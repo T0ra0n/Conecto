@@ -1,56 +1,24 @@
 // distance-slider.js
 // Gestionează funcționalitatea slider-ului de distanță pentru filtrarea evenimentelor
 
-// Funcție pentru a obține poziția utilizatorului
-function getUserLocation() {
-    return new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userPos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    window.userPosition = userPos;
-                    resolve(userPos);
-                },
-                (error) => {
-                    console.error('Eroare la obținerea locației:', error);
-                    // Folosim Cluj-Napoca ca locație implicită
-                    window.userPosition = { lat: 46.770439, lng: 23.591423 };
-                    resolve(window.userPosition);
-                }
-            );
-        } else {
-            console.log('Geolocația nu este suportată de acest browser');
-            // Folosim Cluj-Napoca ca locație implicită
-            window.userPosition = { lat: 46.770439, lng: 23.591423 };
-            resolve(window.userPosition);
-        }
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     const distanceSlider = document.getElementById('distance-slider');
     const distanceValue = document.getElementById('distance-value');
     
     if (!distanceSlider || !distanceValue) return;
     
-    // Obținem poziția utilizatorului și apoi inițializăm slider-ul
-    getUserLocation().then(() => {
-        // Actualizează doar valoarea afișată când se trage slider-ul
-        distanceSlider.addEventListener('input', function() {
-            distanceValue.textContent = this.value;
-        });
-        
-        // Aplică filtrarea doar când se eliberează mouse-ul
-        distanceSlider.addEventListener('change', function() {
-            filterEventsByDistance(parseInt(this.value));
-        });
-        
-        // Aplică filtrarea inițială
-        filterEventsByDistance(parseInt(distanceSlider.value));
+    // Actualizează doar valoarea afișată când se trage slider-ul
+    distanceSlider.addEventListener('input', function() {
+        distanceValue.textContent = this.value;
     });
+    
+    // Aplică filtrarea doar când se eliberează mouse-ul
+    distanceSlider.addEventListener('change', function() {
+        filterEventsByDistance(parseInt(this.value));
+    });
+    
+    // Aplică filtrarea inițială
+    filterEventsByDistance(parseInt(distanceSlider.value));
 });
 
 /**
@@ -58,154 +26,51 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {number} maxDistanceInKm - Distanța maximă în kilometri
  */
 function filterEventsByDistance(maxDistanceInKm) {
-    console.log('=== FILTRARE DUPĂ DISTANȚĂ ===');
-    console.log('Distanță maximă setată la:', maxDistanceInKm, 'km');
-    
     // Actualizăm filtrul global de distanță
     window.currentDistanceFilter = maxDistanceInKm;
     
-    // Obținem poziția curentă a utilizatorului (dacă este disponibilă)
-    const userPosition = window.userPosition || { lat: 46.7730432, lng: 23.576576 };
-    console.log('Poziția utilizatorului:', userPosition);
+    // Obținem orașul curent
+    const currentCity = document.getElementById('currentCity')?.textContent || 'Cluj-Napoca';
     
-    // Obținem toți markerii de pe hartă
-    const markers = [];
-    
-    // Căutăm în toate panourile Leaflet care conțin markeri
-    const markerPanes = document.querySelectorAll('.leaflet-marker-pane > *');
-    console.log('Am găsit', markerPanes.length, 'markeri în panoul de markeri');
-    
-    // Adăugăm fiecare marker în lista noastră
-    markerPanes.forEach(markerElement => {
-        // Obținem coordonatele din atributul style
-        const style = markerElement.getAttribute('style') || '';
-        const transformMatch = style.match(/translate3d\((\d+)px, (\d+)px/);
+    // Reafișăm evenimentele pentru a aplica noul filtru
+    if (window.EventsFilterModule && typeof window.EventsFilterModule.showEventsForCity === 'function') {
+        // Obținem filtrul curent de timp
+        const activeTimeFilter = document.querySelector('.events-filter .filter-btn.active')?.getAttribute('data-filter') || 'today';
         
-        if (transformMatch) {
-            const x = parseInt(transformMatch[1]);
-            const y = parseInt(transformMatch[2]);
-            
-            // Obținem titlul markerului (dacă există)
-            const title = markerElement.getAttribute('title') || 'Fără titlu';
-            
-            // Adăugăm markerul în listă
-            markers.push({
-                element: markerElement,
-                x: x,
-                y: y,
-                title: title
-            });
-        }
-    });
-    
-    console.log('Am procesat', markers.length, 'markeri');
-    
-    if (markers.length === 0) {
-        console.error('Nu s-au găsit markeri pe hartă');
-        return;
+        // Reafișăm evenimentele cu filtrul de timp curent
+        window.EventsFilterModule.showEventsForCity(currentCity, activeTimeFilter);
     }
     
-    // Parcurgem fiecare marker
-    markers.forEach(marker => {
-        try {
-            // Obținem elementul părinte care conține coordonatele
-            const markerContainer = marker.element.closest('[data-lat][data-lng]') || 
-                                 document.querySelector(`[title="${marker.title}"][data-lat][data-lng]`);
-            
-            let distance = 0;
-            
-            if (markerContainer) {
-                // Dacă avem coordonate în atributul data-
-                const lat = parseFloat(markerContainer.dataset.lat);
-                const lng = parseFloat(markerContainer.dataset.lng);
-                
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    // Calculăm distanța reală folosind formula Haversine
-                    distance = calculateDistance(
-                        userPosition.lat,
-                        userPosition.lng,
-                        lat,
-                        lng
-                    );
-                    
-                    // Actualizăm afișajul distanței în card (dacă există)
-                    const distanceElement = markerContainer.querySelector('.distance');
-                    if (distanceElement) {
-                        distanceElement.textContent = `${distance.toFixed(1)} km`;
-                    }
-                }
-            } else {
-                // Dacă nu găsim coordonate, folosim o aproximare bazată pe poziția pe ecran
-                distance = Math.sqrt(
-                    Math.pow(marker.x - 0, 2) + 
-                    Math.pow(marker.y - 0, 2)
-                ) / 100;
-            }
-            
-            console.log(`Eveniment: ${marker.title} la ${distance.toFixed(1)}km`);
-            
-            // Actualizăm vizibilitatea markerului
-            const isVisible = distance <= maxDistanceInKm;
-            marker.element.style.display = isVisible ? '' : 'none';
-            
-            // Actualizăm și vizibilitatea cardului corespunzător (dacă există)
-            if (markerContainer) {
-                markerContainer.style.display = isVisible ? '' : 'none';
-            }
-            
-        } catch (error) {
-            console.error('Eroare la procesarea markerului:', error, marker);
+    // Actualizăm vizual elementele din listă
+    const eventElements = document.querySelectorAll('.event-card, .event-item');
+    eventElements.forEach(eventEl => {
+        const eventDistance = parseFloat(eventEl.dataset.distance) || 0;
+        if (eventDistance <= maxDistanceInKm) {
+            eventEl.style.display = '';
+        } else {
+            eventEl.style.display = 'none';
         }
     });
-    
-    console.log('Am actualizat vizibilitatea markerilor');
-    
-    console.log('=== SFÂRȘIT FILTRARE ===');
 }
 
 /**
- * Calculează distanța dintre două puncte geografice folosind aceeași metodă ca în carduri (L.latLng().distanceTo())
- * @param {number} lat1 - Latitudinea primului punct (în grade zecimale)
- * @param {number} lon1 - Longitudinea primului punct (în grade zecimale)
- * @param {number} lat2 - Latitudinea celui de-al doilea punct (în grade zecimale)
- * @param {number} lon2 - Longitudinea celui de-al doilea punct (în grade zecimale)
- * @returns {number} Distanța în kilometri, rotunjită la o zecimală
+ * Calculează distanța dintre două puncte geografice folosind formula Haversine
+ * @param {number} lat1 - Latitudinea primului punct
+ * @param {number} lon1 - Longitudinea primului punct
+ * @param {number} lat2 - Latitudinea celui de-al doilea punct
+ * @param {number} lon2 - Longitudinea celui de-al doilea punct
+ * @returns {number} Distanța în kilometri
  */
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    try {
-        // Folosim aceeași metodă ca în carduri
-        const point1 = L.latLng(lat1, lon1);
-        const point2 = L.latLng(lat2, lon2);
-        const distanceInMeters = point1.distanceTo(point2);
-        const distanceInKm = distanceInMeters / 1000;
-        
-        console.log('=== CALCUL DISTANȚĂ ===');
-        console.log('Punctul A (tine):', point1);
-        console.log('Punctul B (eveniment):', point2);
-        console.log('Distanța calculată:', distanceInKm.toFixed(3), 'km');
-        console.log('=== SFÂRȘIT CALCUL ===');
-        
-        return parseFloat(distanceInKm.toFixed(1));
-    } catch (error) {
-        console.error('Eroare la calculul distanței cu Leaflet:', error);
-        // Revenim la formula anterioară dacă apare vreo eroare
-        return calculateDistanceFallback(lat1, lon1, lat2, lon2);
-    }
-}
-
-/**
- * Funcție de rezervă pentru calculul distanței (folosită doar dacă L.latLng nu este disponibil)
- */
-function calculateDistanceFallback(lat1, lon1, lat2, lon2) {
     const R = 6371; // Raza Pământului în km
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return parseFloat((R * c).toFixed(1));
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distanța în km
 }
 
 /**

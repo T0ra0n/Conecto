@@ -453,6 +453,7 @@ function centerOnLocation() {
             duration: 1
         });
     } else if (navigator.geolocation) {
+        console.log('Geolocation API este disponibil');
         const geoOptions = {
             enableHighAccuracy: true,
             maximumAge: 0,
@@ -460,17 +461,84 @@ function centerOnLocation() {
             desiredAccuracy: 10
         };
 
-        navigator.geolocation.getCurrentPosition((pos) => {
+        // Adăugăm un handler pentru erori
+        const errorCallback = (error) => {
+            let errorMessage = 'Eroare la obținerea locației: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += 'Utilizatorul a refuzat cererea de geolocație.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'Informațiile despre locație nu sunt disponibile.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += 'Cererea de geolocație a expirat.';
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMessage += 'A apărut o eroare necunoscută.';
+                    break;
+            }
+            console.error(errorMessage, error);
+            // Poți adăuga aici o notificare pentru utilizator
+            alert(errorMessage);
+        };
+
+        console.log('Încercăm să obținem locația...');
+        
+        // Funcție pentru a gestiona succesul obținerii locației
+        const success = (pos) => {
+            console.log('Locație obținută cu succes:', pos);
             currentPosition = pos;
             map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, {
                 duration: 0.5,
                 easeLinearity: 0.25,
-                animate: true
             });
-        }, (error) => {
-            console.error('Eroare la obținerea locației:', error);
-            alert('Nu s-a putut obține locația curentă. Asigură-te că ai permis accesul la geolocație.');
-        });
+        };
+
+        // Funcție pentru a gestiona erorile
+        const error = (err) => {
+            console.error('Eroare la obținerea locației:', err);
+            let errorMessage = 'Nu s-a putut obține locația curentă. ';
+            
+            switch(err.code) {
+                case err.PERMISSION_DENIED:
+                    errorMessage += 'Ai refuzat cererea de acces la geolocație. Te rugăm să activezi permisiunile în setările browser-ului.';
+                    break;
+                case err.POSITION_UNAVAILABLE:
+                    errorMessage += 'Informațiile despre locație nu sunt disponibile.';
+                    break;
+                case err.TIMEOUT:
+                    errorMessage += 'Cererea a expirat. Verifică conexiunea la internet.';
+                    break;
+                default:
+                    errorMessage += 'Eroare necunoscută.';
+            }
+            
+            // Afișează un mesaj mai prietenos pe mobil
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                alert('Pentru a folosi funcționalitatea de localizare pe iOS, te rugăm să:\n\n' +
+                    '1. Deschide Safari\n' +
+                    '2. Apasă pe butonul de partajare (patrat cu săgeată în sus)\n' +
+                    '3. Alege "Setări pentru acest site web"\n' +
+                    '4. Activează "Locație"\n' +
+                    '5. Reîncarcă pagina');
+            } else {
+                alert(errorMessage);
+            }
+        };
+
+        // Încercăm să obținem locația cu opțiuni specifice
+        try {
+            navigator.geolocation.getCurrentPosition(success, error, {
+                enableHighAccuracy: true,
+                timeout: 10000,        // 10 secunde timeout
+                maximumAge: 0,         // Forțează obținerea unei noi locații
+                distanceFilter: 10      // 10 metri distanță minimă pentru update
+            });
+        } catch (e) {
+            console.error('Eroare la apelul getCurrentPosition:', e);
+            alert('A apărut o eroare la accesarea serviciului de geolocație.');
+        }
     } else {
         alert('Geolocația nu este suportată de acest browser.');
     }
