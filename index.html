@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harta Mea</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+
+<body>
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="citySearch" placeholder="Caută localitate..." autocomplete="off">
+            <div class="map-controls">
+                <button class="locate-btn" id="locateMe" title="Localizează-mă">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#4285F4">
+                        <path
+                            d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.44-7.94-7.94V1h-2v2.06C6.83 3.56 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.44 7.94 7.94V23h2v-2.06c4.17-.46 7.44-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+                    </svg>
+                </button>
+                <button class="map-toggle-btn" id="mapToggle" title="Afișează harta satelit">
+                    <img src="Content\Satellite.jpeg" alt="Hartă" class="map-toggle-img map-icon" />
+                    <img src="Content\Map.png" alt="Satelit" class="map-toggle-img satellite-icon"
+                        style="display: none;" />
+                </button>
+            </div>
+        </div>
+        <div class="distance-filter">
+            <div class="distance-slider-container">
+                <input type="range" id="distance-slider" min="1" max="50" value="5" step="1" class="slider">
+                <div class="distance-display">
+                    <span id="distance-value">5</span>
+                    <span class="distance-unit">km</span>
+                </div>
+            </div>
+        </div>
+        <div id="searchResults" class="search-results"></div>
+    </div>
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- Filtre categorii evenimente -->
+    <!-- Container principal pentru toate filtrele -->
+    <div class="filters-container">
+        <!-- Filtre categorii evenimente -->
+        <div class="categories-filter">
+            <div class="categories-scroll">
+                <button class="category-btn active" data-category="all"><i class="fas fa-star"></i> Toate</button>
+                <button class="category-btn" data-category="muzica"><i class="fas fa-music"></i> Muzică</button>
+                <button class="category-btn" data-category="film"><i class="fas fa-film"></i> Film</button>
+                <button class="category-btn" data-category="jocuri"><i class="fas fa-gamepad"></i> Jocuri</button>
+                <button class="category-btn" data-category="social"><i class="fas fa-users"></i> Social</button>
+                <button class="category-btn" data-category="sport"><i class="fas fa-futbol"></i> Sport</button>
+                <button class="category-btn" data-category="arta"><i class="fas fa-palette"></i> Artă</button>
+                <button class="category-btn" data-category="tehnic"><i class="fas fa-laptop-code"></i> Tehnic</button>
+                <button class="category-btn" data-category="educatie"><i
+                        class="fas fa-graduation-cap"></i>Educație</button>
+            </div>
+        </div>
+
+        <!-- Filtre zile evenimente -->
+        <div class="events-filter">
+            <div class="date-filter-container">
+                <!-- Zilele vor fi adăugate din JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/events-filter.js"></script>
+    <script src="js/eventsData.js"></script>
+    <script src="js/date-filter.js"></script>
+    <script src="js/distance-slider.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
