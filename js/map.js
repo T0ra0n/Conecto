@@ -101,8 +101,8 @@ const satelliteMap = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 });
 
-// Mod curent pentru stratul de bază al hărții: 'auto' | 'dark' | 'satellite'
-let currentBaseLayerMode = 'auto';
+// Mod curent pentru stratul de bază al hărții: 'light' | 'dark' | 'satellite'
+let currentBaseLayerMode = 'light';
 
 // Funcții pentru gestionarea temei
 async function getSunTimes(lat, lon) {
@@ -140,13 +140,14 @@ function showMapWithTheme() {
     if (isNight) {
         darkMap.addTo(map);
         document.body.classList.add('dark-theme');
+        document.body.classList.remove('satellite-theme');
+        currentBaseLayerMode = 'dark';
     } else {
         lightMap.addTo(map);
         document.body.classList.remove('dark-theme');
+        document.body.classList.remove('satellite-theme');
+        currentBaseLayerMode = 'light';
     }
-
-    document.body.classList.remove('satellite-theme');
-    currentBaseLayerMode = 'auto';
 }
 
 function scheduleNextUpdate() {
@@ -185,10 +186,10 @@ function toggleMapType() {
     const satelliteIcon = document.querySelector('.satellite-icon');
     const darkIcon = document.querySelector('.dark-icon');
     const toggleButton = document.getElementById('mapToggle');
-    
-    // Comutăm între modurile: auto -> dark -> satellite -> auto
-    if (currentBaseLayerMode === 'auto') {
-        // Forțăm modul întunecat
+
+    // Comutăm între modurile: light -> dark -> satellite -> light
+    if (currentBaseLayerMode === 'light') {
+        // Trecem pe modul întunecat
         if (map.hasLayer(lightMap)) lightMap.remove();
         if (map.hasLayer(satelliteMap)) satelliteMap.remove();
         if (!map.hasLayer(darkMap)) darkMap.addTo(map);
@@ -218,15 +219,20 @@ function toggleMapType() {
 
         currentBaseLayerMode = 'satellite';
     } else {
-        // Revenim la modul auto (zi/noapte)
-        showMapWithTheme();
+        // Revenim la modul standard (hartă deschisă)
+        if (map.hasLayer(darkMap)) darkMap.remove();
+        if (map.hasLayer(satelliteMap)) satelliteMap.remove();
+        if (!map.hasLayer(lightMap)) lightMap.addTo(map);
+
+        document.body.classList.remove('dark-theme');
+        document.body.classList.remove('satellite-theme');
 
         if (mapIcon) mapIcon.style.display = 'block';
         if (satelliteIcon) satelliteIcon.style.display = 'none';
         if (darkIcon) darkIcon.style.display = 'none';
         toggleButton.setAttribute('title', 'Afișează harta întunecată');
 
-        currentBaseLayerMode = 'auto';
+        currentBaseLayerMode = 'light';
     }
 }
 
