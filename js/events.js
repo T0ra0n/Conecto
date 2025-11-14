@@ -196,7 +196,7 @@ const eventsData = {
             price: '30 RON',
             category: 'Film',
             image: 'https://example.com/inception.jpg',
-            lat: 46.7694,
+            lat: 46.7750,
             lng: 23.5900
         },
         {
@@ -210,7 +210,7 @@ const eventsData = {
             price: '25 RON',
             category: 'Turism',
             image: 'https://example.com/jewish_quarter.jpg',
-            lat: 46.7694,
+            lat: 46.7730,
             lng: 23.5900
         },
         // Evenimente pentru 16 Noiembrie 2025
@@ -313,20 +313,20 @@ const eventsData = {
             lat: 46.7611,
             lng: 23.5935
         },
-        {
-            id: 'evt23',
-            title: 'Tur al Cetatii Clujului',
-            description: 'Tur istoric prin vechile ziduri ale cetatii.',
-            date: '2025-11-17',
-            time: '15:00',
-            location: 'Piata Unirii',
-            address: 'Piata Unirii, Cluj-Napoca',
-            price: '30 RON',
-            category: 'Turism',
-            image: 'https://example.com/cetatea_cluj.jpg',
-            lat: 46.7694,
-            lng: 23.5900
-        },
+        // {
+        //     id: 'evt23',
+        //     title: 'Tur al Cetatii Clujului',
+        //     description: 'Tur istoric prin vechile ziduri ale cetatii.',
+        //     date: '2025-11-17',
+        //     time: '15:00',
+        //     location: 'Piata Unirii',
+        //     address: 'Piata Unirii, Cluj-Napoca',
+        //     price: '30 RON',
+        //     category: 'Turism',
+        //     image: 'https://example.com/cetatea_cluj.jpg',
+        //     lat: 46.7694,
+        //     lng: 23.5900
+        // },
         {
             id: 'evt24',
             title: 'Workshop de Dans',
@@ -514,5 +514,4 @@ try {
         }
     }
 } catch (e) {
-    console.error('Eroare la exportul datelor:', e);
 }

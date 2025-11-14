@@ -1,15 +1,21 @@
-
-
-
 @media (min-width: 600px) {
     .categories-scroll {
         justify-content: center;
         padding: 0 20px;
     }
-    
+
     .categories-filter {
         display: flex;
         justify-content: center;
+        width: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding: 5px 0 0px 0px;
+        background: rgba(40, 44, 52, 0.1);
+        backdrop-filter: blur(10px);
+        /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
+        border-bottom: none;
     }
 }
 
@@ -22,61 +28,74 @@
 
 /* Stiluri pentru ecrane mici */
 @media (max-width: 768px) {
-    html, body {
+
+    html,
+    body {
         width: 100%;
         height: 100%;
         margin: 0;
         padding: 0;
         overflow-x: hidden;
     }
-    
-    .map-container {
-        width: 100% !important;
-        height: 100% !important;
-    }
-    
+
     .sidebar {
         width: 100% !important;
         height: auto !important;
         max-height: 40vh;
         overflow-y: auto;
     }
-    
+
     .events-list {
         padding: 10px;
     }
-    
+
     .event-card {
         width: 100%;
         margin: 8px 0;
     }
+
     .date-btn {
         min-width: 50px;
         padding: 6px 8px;
         border-radius: 8px;
     }
-    
+
     .date-btn .day-name {
         font-size: 8px;
         margin-bottom: 1px;
     }
-    
+
     .date-btn .day-number {
         font-size: 14px;
         font-weight: 600;
         margin: 1px 0;
     }
-    
+
     .date-btn .month {
         font-size: 10px;
     }
-    
+
     .date-filter-container {
-        padding: 8px 10px;
+        padding: 5px;
         gap: 6px;
     }
-    
+
     .events-filter {
-        min-height: 60px;
+        min-height: 10vh;
     }
+
+    .map-container {
+        width: 100% !important;
+        height: 100vh !important;
+    }
+
+
+    #map {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        transition: filter 0.3s ease;
+        box-shadow: var(--neon-glow);
+    }
+
 }

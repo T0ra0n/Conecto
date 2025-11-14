@@ -5,7 +5,7 @@ class DateFilter {
         this.currentDate = new Date();
         this.init();
     }
-
+    
     init() {
         this.generateDateButtons();
         this.setupEventListeners();
@@ -26,7 +26,7 @@ class DateFilter {
             
             const dateElement = document.createElement('button');
             dateElement.className = 'date-btn';
-            dateElement.dataset.date = this.formatDate(date);
+            dateElement.dataset.date = formatDate(date);
             
             // Adăugăm clasa 'weekend' pentru sâmbătă și duminică
             if (date.getDay() === 0 || date.getDay() === 6) {
@@ -48,13 +48,7 @@ class DateFilter {
         }
     }
 
-    formatDate(date) {
-        // Folosim metoda de formatare care ia în considerare fusul orar local
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
+    // Folosim funcția globală formatDate definită mai jos
 
     selectDate(selectedDate) {
         // Asigurăm că data este corectă prin resetarea orelor
@@ -67,7 +61,7 @@ class DateFilter {
         });
         
         // Găsim și selectăm butonul corespunzător datei
-        const dateStr = this.formatDate(normalizedDate);
+        const dateStr = formatDate(normalizedDate);
         const selectedBtn = document.querySelector(`.date-btn[data-date="${dateStr}"]`);
         
         if (selectedBtn) {
@@ -83,7 +77,7 @@ class DateFilter {
     dispatchDateSelectedEvent(date) {
         const event = new CustomEvent('dateSelected', {
             detail: {
-                date: this.formatDate(date)
+                date: formatDate(date)
             }
         });
         document.dispatchEvent(event);
@@ -102,7 +96,102 @@ class DateFilter {
     }
 }
 
+// Funcție pentru formatarea datei ca YYYY-MM-DD
+function formatDate(date) {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+}
+
+function getWeekRange(date = new Date()) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Ajustare pentru luni ca primă zi a săptămânii
+
+    const monday = new Date(d.setDate(diff));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return {
+        start: formatDate(monday),
+        end: formatDate(sunday)
+    };
+}
+
+function isDateInRange(date, startDate, endDate) {
+    const d = new Date(date);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Setăm orele la 00:00:00 pentru comparare corectă
+    d.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999); // Până la sfârșitul zilei
+
+    return d >= start && d <= end;
+}
+
+function isWeekend(date) {
+    const day = new Date(date).getDay();
+    return day === 0 || day === 6; // 0 = Duminică, 6 = Sâmbătă
+}
+
+function getNextWeekend() {
+    const today = new Date();
+    const day = today.getDay();
+    const daysUntilSaturday = 6 - day; // 6 = Sâmbătă
+
+    const saturday = new Date(today);
+    saturday.setDate(today.getDate() + daysUntilSaturday);
+
+    const sunday = new Date(saturday);
+    sunday.setDate(saturday.getDate() + 1);
+
+    return {
+        start: formatDate(saturday),
+        end: formatDate(sunday)
+    };
+}
+
+function filterEventsByDate(events, dateString) {
+    if (!dateString) return events;
+
+    const selectedDate = new Date(dateString);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    return events.filter(event => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate.getTime() === selectedDate.getTime();
+    });
+}
+
+
+// Exportăm funcțiile necesare
+const DateFilterModule = {
+    DateFilter,
+    formatDate,
+    getWeekRange,
+    isDateInRange,
+    isWeekend,
+    getNextWeekend,
+    filterEventsByDate
+};
+
 // Inițializare când DOM-ul este încărcat
 document.addEventListener('DOMContentLoaded', () => {
     window.dateFilter = new DateFilter();
 });
+
+// Export pentru Node.js sau module ES6
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = DateFilterModule;
+} else {
+    window.DateFilterModule = DateFilterModule;
+}

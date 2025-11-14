@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harta Mea</title>
+    <title>Conecto</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -25,20 +25,11 @@
                 </button>
                 <button class="map-toggle-btn" id="mapToggle" title="Afișează harta satelit">
                     <img src="Content\Satellite.jpeg" alt="Hartă" class="map-toggle-img map-icon" />
-                    <img src="Content\Map.png" alt="Satelit" class="map-toggle-img satellite-icon"
-                        style="display: none;" />
+                    <img src="Content\Black.png" alt="Hartă întunecată" class="map-toggle-img dark-icon" style="display: none;" />
+                    <img src="Content\Map.png" alt="Satelit" class="map-toggle-img satellite-icon" style="display: none;" />
                 </button>
             </div>
         </div>
-        <!-- <div class="distance-filter">
-            <div class="distance-slider-container">
-                <input type="range" id="distance-slider" min="1" max="50" value="5" step="1" class="slider">
-                <div class="distance-display">
-                    <span id="distance-value">5</span>
-                    <span class="distance-unit">km</span>
-                </div>
-            </div>
-        </div> -->
         <div id="searchResults" class="search-results"></div>
     </div>
     <div class="map-container">
@@ -51,7 +42,7 @@
         <!-- Filtre categorii evenimente -->
         <div class="categories-filter">
             <div class="categories-scroll">
-                <button class="category-btn active" data-category="all"><i class="fas fa-star"></i> Toate</button>
+                <button class="category-btn active" data-category="all"><i class="fas fa-map-marker-alt"></i> Toate</button>
                 <button class="category-btn" data-category="muzica"><i class="fas fa-music"></i> Muzică</button>
                 <button class="category-btn" data-category="film"><i class="fas fa-film"></i> Film</button>
                 <button class="category-btn" data-category="jocuri"><i class="fas fa-gamepad"></i> Jocuri</button>
@@ -72,13 +63,14 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="js/events-filter.js"></script>
-    <script src="js/eventsData.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/map.js"></script>   
     <script src="js/date-filter.js"></script>
-    <script src="js/distance-slider.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/category-filters-core.js"></script>
+    <script src="js/events-markers.js"></script>
+    <script src="js/events-filters-ui.js"></script>
+    
 </body>
 
 </html>

@@ -2,7 +2,7 @@
 :root {
     --primary-color: #00f7ff;
     --secondary-color: #ff00f7;
-    --bg-dark: #0a0a1a;
+    --bg-dark: black;
     --text-light: #ffffff;
     --text-dark: #333333;
     --search-bg: rgba(0, 0, 0, 0.9);
@@ -31,12 +31,13 @@ body {
 /* Stiluri pentru containerul hărții */
 .map-container {
     position: relative;
-    height: calc(100vh - 70px); /* Scădem înălțimea header-ului și a filtrelor */
+    height: calc(100vh - 70px);
+    /* Scădem înălțimea header-ului și a filtrelor */
     width: 100%;
     z-index: 1;
     display: flex;
     flex-direction: column;
-    margin:0;
+    margin: 0;
 }
 
 
@@ -78,59 +79,29 @@ body {
     align-items: center;
 }
 
-/* Stiluri pentru evenimente */
-.event-marker-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 24px;
-    height: 32px;
-    position: relative;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.event-marker {
-    width: 24px;
-    height: 24px;
-    border-radius: 50% 50% 50% 0;
-    background: currentColor;
-    position: absolute;
-    top: 0;
-    transform: rotate(-45deg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 12px;
-    transition: all 0.2s ease;
-}
-
-.event-marker i {
-    transform: rotate(45deg);
-    margin-right: -1px;
-    margin-top: -1px;
-}
-
-.event-marker:hover {
-    transform: scale(1.1) rotate(-45deg);
-    z-index: 1000;
-}
 
 .leaflet-popup-content-wrapper {
     padding: 0;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    bottom: 1000px;
+    left: 1000px;
 }
 
 .leaflet-popup-content {
     margin: 0;
     width: 280px !important;
+    bottom: 1000px;
+    left: 1000px;
+
 }
 
 .event-popup {
     font-family: 'Roboto', sans-serif;
     color: #333;
+    bottom: 1000px;
+    left: 1000px;
 }
 
 .event-header {
@@ -138,6 +109,7 @@ body {
     color: white;
     position: relative;
 }
+
 
 .event-header h3 {
     margin: 0 0 5px 0;
@@ -156,7 +128,7 @@ body {
 
 .event-body {
     padding: 15px;
-    background:transparent;
+    background: transparent;
 }
 
 .event-details {
@@ -204,20 +176,26 @@ body {
 /* Stiluri pentru filtrele de evenimente */
 .events-filter {
     position: relative;
-    display: flex;
+    display: flex;  
     bottom: 0;
     left: 0;
     right: 0;
     align-items: center;
-    justify-content: flex-start; /* Aliniem la stânga pentru a permite derularea */
-    background: rgb(15,16,18);
+    justify-content: flex-start;
+    background: rgba(0, 0, 0, 0.1);
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0 0px 0px;
+    backdrop-filter: blur(10px);
+    border-bottom: none;
     overflow-x: auto;
     white-space: nowrap;
     scrollbar-width: none;
     -ms-overflow-style: none;
     margin: 0;
     border: none;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
     padding: 0;
     box-sizing: border-box;
     border-top: 1px solid rgba(100, 149, 237, 0.2);
@@ -285,8 +263,7 @@ body {
     text-transform: lowercase;
 }
 
-Stil pentru zilele de weekend
-.date-btn.weekend {
+Stil pentru zilele de weekend .date-btn.weekend {
     color: #ffffffde;
 }
 
@@ -316,36 +293,45 @@ Stil pentru zilele de weekend
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    transform: none; /* Eliminăm transformarea care îl făcea să sară în sus */
+    transform: none;
+    /* Eliminăm transformarea care îl făcea să sară în sus */
     position: relative;
-    top: 0; /* Asigurăm că rămâne la același nivel */
+    top: 0;
+    /* Asigurăm că rămâne la același nivel */
 }
 
 .filter-btn {
     background: transparent;
     border: 0px solid rgba(100, 149, 237, 0.3);
     color: #bbbbbb;
-    padding: 8px 12px; /* Am redus padding-ul vertical */
+    padding: 8px 12px;
+    /* Am redus padding-ul vertical */
     margin: 0;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 13px; /* Font mai mic pentru ecrane mici */
+    font-size: 13px;
+    /* Font mai mic pentru ecrane mici */
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Roboto', sans-serif;
     white-space: nowrap;
-    min-width: auto; /* Lăsăm lățimea să se ajusteze după conținut */
-    max-width: 120px; /* Lățime maximă pentru butoane */
+    min-width: auto;
+    /* Lăsăm lățimea să se ajusteze după conținut */
+    max-width: 120px;
+    /* Lățime maximă pentru butoane */
     text-align: center;
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 34px; /* Înălțime ușor micșorată */
+    height: 34px;
+    /* Înălțime ușor micșorată */
     overflow: hidden;
     z-index: 1;
-    flex-shrink: 0; /* Impiedică micșorarea excesivă a butoanelor */
-    flex-grow: 1; /* Permite butoanelor să ocupe spațiu disponibil */
+    flex-shrink: 0;
+    /* Impiedică micșorarea excesivă a butoanelor */
+    flex-grow: 1;
+    /* Permite butoanelor să ocupe spațiu disponibil */
 }
 
 /* Stiluri container filtre */
@@ -355,13 +341,17 @@ Stil pentru zilele de weekend
     left: 0;
     right: 0;
     z-index: 2000;
-    background: transparent; /* Eliminăm fundalul */
-    backdrop-filter: none; /* Eliminăm blur-ul */
-    border: none; /* Eliminăm bordura */
+    background: transparent;
+    /* Eliminăm fundalul */
+    backdrop-filter: none;
+    /* Eliminăm blur-ul */
+    border: none;
+    /* Eliminăm bordura */
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0px; /* Reducem spațiul dintre elemente */
+    gap: 0px;
+    /* Reducem spațiul dintre elemente */
 }
 
 /* Stiluri filtre categorii */
@@ -384,21 +374,53 @@ Stil pentru zilele de weekend
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) transparent;
     position: relative;
-    z-index: 2001; /* Asigură că scroll-ul este deasupra containerului */
+    z-index: 2001;
+    /* Asigură că scroll-ul este deasupra containerului */
 }
 
 /* Ascundem bara de derulare dar păstrăm funcționalitatea */
 .categories-scroll::-webkit-scrollbar {
-    display: none; /* Ascunde bara de derulare pentru WebKit (Chrome, Safari, etc) */
+    display: none;
+    /* Ascunde bara de derulare pentru WebKit (Chrome, Safari, etc) */
 }
 
 .categories-scroll {
-    -ms-overflow-style: none;  /* Ascunde bara de derulare pentru IE și Edge */
-    scrollbar-width: none;  /* Ascunde bara de derulare pentru Firefox */
+    -ms-overflow-style: none;
+    /* Ascunde bara de derulare pentru IE și Edge */
+    scrollbar-width: none;
+    /* Ascunde bara de derulare pentru Firefox */
 }
 
 .categories-scroll::-webkit-scrollbar-track {
     background: transparent;
+}
+
+.category-btn.active i {
+    background: #6495ed;
+    color: white;
+}
+
+.category-btn.active .event-count {
+    background: #3ba55d;
+}
+
+.event-count {
+    font-family: 'Roboto', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    color: #fff;
+    background: #3ba55d;
+    border-radius: 999px;
+    padding: 1px 4px;
+    min-width: 14px;
+    text-align: center;
+    position: absolute;
+    /* Poziționăm badge-ul în colțul de jos-dreapta al cercului cu iconița */
+    top: 18px;
+    right: 16px;
+    border: 2px rgb(0, 0, 0) solid;
+    transform: translate(50%, 50%);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
 }
 
 .category-btn {
@@ -406,7 +428,7 @@ Stil pentru zilele de weekend
     padding: 5px 10px;
     border: none;
     background: transparent;
-    color: rgba(255, 255, 255, 0.5);
+    color: #bbbbbb;
     font-family: 'Roboto', sans-serif;
     font-size: 12px;
     font-weight: 400;
@@ -416,16 +438,38 @@ Stil pentru zilele de weekend
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 2px;
+    gap: 4px;
     white-space: nowrap;
     min-width: 60px;
     position: relative;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+
+.category-btn:focus {
+    outline: none;
+}
+
+.category-btn:active {
+    background: transparent;
+    outline: none;
 }
 
 .category-btn i {
-    font-size: 18px;
-    display: block;
-    margin-bottom: 2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 4px;
+    position: relative;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
 .category-text-container {
@@ -442,35 +486,6 @@ Stil pentru zilele de weekend
     font-weight: 400;
     letter-spacing: 0.3px;
 }
-
-.event-count {
-    font-family: 'Roboto', sans-serif;
-    font-size: 10px;
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.7);
-    position: relative;
-    top: 0;
-    letter-spacing: 0.2px;
-}
-
-
-.category-btn.active {
-    /* background: rgba(255, 255, 255, 0.1); */
-    color: white;
-    font-weight: 500;
-    border: none;
-    position: relative;
-}
-
-.category-btn.active .event-count {
-    color: #fff;
-    opacity: 0.9;
-}
-
-.category-btn.active i {
-    color:white;
-}
-
 
 
 /* Stiluri pentru bara de căutare */
@@ -491,7 +506,7 @@ Stil pentru zilele de weekend
     flex-direction: column;
 }
 
-.search-container > * {
+.search-container>* {
     pointer-events: auto;
 }
 
@@ -510,7 +525,8 @@ Stil pentru zilele de weekend
     width: 100%;
     box-sizing: border-box;
     gap: 8px;
-    justify-content: flex-start; /* Asigură că elementele încep de la stânga */
+    justify-content: flex-start;
+    /* Asigură că elementele încep de la stânga */
 }
 
 .search-box::before {
@@ -565,10 +581,14 @@ Stil pentru zilele de weekend
     border-radius: 15px;
     max-height: 400px;
     /* Ascundem bara de scroll dar păstrăm funcționalitatea */
-    -ms-overflow-style: none;  /* IE și Edge */
-    scrollbar-width: none;  /* Firefox */
-    overflow-y: scroll; /* Păstrăm derularea activă */
-    overflow-x: hidden; /* Ascunde bara orizontală */
+    -ms-overflow-style: none;
+    /* IE și Edge */
+    scrollbar-width: none;
+    /* Firefox */
+    overflow-y: scroll;
+    /* Păstrăm derularea activă */
+    overflow-x: hidden;
+    /* Ascunde bara orizontală */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     border: 1px solid var(--glass-border);
     opacity: 0;
@@ -576,7 +596,8 @@ Stil pentru zilele de weekend
     transition: opacity 0.3s ease, transform 0.3s ease;
     position: absolute;
     z-index: 1001;
-    pointer-events: none; /* Dezactivăm evenimentele mouse-ului când nu este vizibil */
+    pointer-events: none;
+    /* Dezactivăm evenimentele mouse-ului când nu este vizibil */
     top: 60px;
     left: 10px;
     right: 10px;
@@ -587,7 +608,8 @@ Stil pentru zilele de weekend
     display: block;
     opacity: 1;
     transform: translateY(0);
-    pointer-events: auto; /* Activăm evenimentele mouse-ului doar când este vizibil */
+    pointer-events: auto;
+    /* Activăm evenimentele mouse-ului doar când este vizibil */
 }
 
 /* Permitem interacțiunea cu elementele din interiorul containerului */
@@ -606,36 +628,37 @@ Stil pentru zilele de weekend
 }
 
 .search-results.visible {
-display: block;
-opacity: 1;
-transform: translateY(0);
-pointer-events: auto; /* Asigură-te că lista vizibilă este interactivă */
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    /* Asigură-te că lista vizibilă este interactivă */
 }
 
 .city-item {
-padding: 12px 20px;
-cursor: pointer;
-transition: all 0.2s ease;
-border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-display: flex;
-align-items: center;
-gap: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .city-item:last-child {
-border-bottom: none;
+    border-bottom: none;
 }
 
 .city-item:hover {
-background: rgba(255, 255, 255, 0.05);
-color: var(--primary-color);
-padding-left: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--primary-color);
+    padding-left: 25px;
 }
 
 .city-item i {
-color: var(--primary-color);
-width: 20px;
-text-align: center;
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
 }
 
 /* Stiluri pentru scrollbar */
@@ -648,12 +671,14 @@ text-align: center;
 }
 
 .search-results::-webkit-scrollbar-thumb {
-    background: rgba(156, 39, 176, 0.3); /* Violet mai intens */
+    background: rgba(156, 39, 176, 0.3);
+    /* Violet mai intens */
     border-radius: 2px;
 }
 
 .search-results::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 39, 176, 0.6); /* Violet mai intens la hover */
+    background: rgba(156, 39, 176, 0.6);
+    /* Violet mai intens la hover */
 }
 
 #map {
@@ -665,71 +690,7 @@ text-align: center;
 }
 
 .search-active #map {
-filter: brightness(0.7);
-}
-
-/* Stiluri pentru slider-ul de distanță */
-.distance-filter {
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    max-width: 100%;
-    box-shadow: none;
-}
-
-.distance-slider-container {
-    width: 100%;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 15px;
-    box-sizing: border-box;
-    max-width: none; /* Eliminăm orice restricție de lățime maximă */
-}
-
-#distance-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    background: #959292;
-    outline: none;
-    margin: 10px 0;
-}
-
-#distance-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #2346d0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-#distance-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 4px rgba(156, 39, 176, 0.2);
-}
-
-.distance-display {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-}
-
-#distance-value {
-    color: #a8a8a8;
-    font-size: 0.8em;
-    font-weight: 400;
-}
-
-.distance-unit {
-    color: #a8a8a8;
-    font-size: 0.8em;
+    filter: brightness(0.7);
 }
 
 /* Ascundem butoalele de zoom */
@@ -738,33 +699,33 @@ filter: brightness(0.7);
 }
 
 .location {
-display: flex;
-gap: 8px;
-margin-left: auto;
-z-index: 1000;
-padding-left: 8px;
-border-left: 1px solid rgba(255, 255, 255, 0.1);
-height: 36px;
-align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    z-index: 1000;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    height: 36px;
+    align-items: center;
 }
 
 .location-info {
-position: absolute;
-top: 10px;
-right: 10px;
-z-index: 1000;
-background: white;
-padding: 10px;
-border-radius: 5px;
-box-shadow: 0 0 10px rgba(0,0,0,0.2);
-transition: background-color 0.5s, color 0.5s;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.5s, color 0.5s;
 }
 
 /* Stiluri pentru tema întunecată */
 .dark-theme .location-info {
     background: #2d3436;
     color: #f0f0f0;
-    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 /* Ascundem butonul de schimbare a hărții */
@@ -779,10 +740,6 @@ transition: background-color 0.5s, color 0.5s;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.satellite-theme .locate-btn {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
 
 .satellite-theme .locate-btn:hover {
     background: white;
@@ -791,7 +748,8 @@ transition: background-color 0.5s, color 0.5s;
 /* Stil pentru containerul de controale */
 .map-controls {
     display: flex;
-    margin-left: auto; /* Asigură alinierea la dreapta */
+    margin-left: auto;
+    /* Asigură alinierea la dreapta */
     position: relative;
     z-index: 1000;
     display: flex;
@@ -813,19 +771,29 @@ transition: background-color 0.5s, color 0.5s;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: white;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-.locate-btn:hover,
-.map-toggle-btn:hover {
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.05);
+.locate-btn:focus,
+.map-toggle-btn:focus {
+    outline: none;
 }
+
+.locate-btn:active,
+.map-toggle-btn:active {
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+}
+
+
 
 .map-toggle-img {
     width: 100%;
@@ -838,10 +806,6 @@ transition: background-color 0.5s, color 0.5s;
     object-position: center;
 }
 
-.locate-btn:hover {
-    background: #f4f4f4;
-    transform: scale(1.05);
-}
 
 .locate-btn svg {
     width: 24px;
@@ -850,9 +814,36 @@ transition: background-color 0.5s, color 0.5s;
 
 .dark-theme .locate-btn {
     background: #2d3436;
-    border-color: rgba(255,255,255,0.2);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .dark-theme .locate-btn:hover {
     background: #3a4042;
+}
+
+/* Stiluri pentru markerii personalizați */
+.custom-marker-container {
+    background: transparent !important;
+    border: none !important;
+}
+
+.custom-marker {
+    /* width: 28px;
+    height: 28px;
+    background: #6495ed;
+    background: transparent;
+    border-radius: 50% 50% 50% 0;
+    position: relative;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease; */
+}
+
+.custom-marker i {
+    color: #3ba55d;
+    font-size: 22px;
+    transform: rotate;
+    text-shadow: 1px 1px 2px rgb(0, 0, 0);
 }

@@ -1,3 +1,4 @@
+
 // Variabile globale
 let sunriseTime = 6; // Ora implicită de răsărit (6:00)
 let sunsetTime = 20; // Ora implicită de apus (20:00)
@@ -8,7 +9,7 @@ let watchId;
 let currentPosition = null;
 
 // Lista orașelor principale din România cu coordonatele lor
-const romanianCities = [
+    const romanianCities = [
     { name: 'București', lat: 44.4268, lng: 26.1025 },
     { name: 'Cluj-Napoca', lat: 46.7712, lng: 23.6236 },
     { name: 'Timișoara', lat: 45.7489, lng: 21.2087 },
@@ -100,6 +101,9 @@ const satelliteMap = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 });
 
+// Mod curent pentru stratul de bază al hărții: 'auto' | 'dark' | 'satellite'
+let currentBaseLayerMode = 'auto';
+
 // Funcții pentru gestionarea temei
 async function getSunTimes(lat, lon) {
     try {
@@ -119,7 +123,6 @@ async function getSunTimes(lat, lon) {
             scheduleNextUpdate();
         }
     } catch (error) {
-        console.error('Eroare la obținerea orelor de răsărit/apus:', error);
         showMapWithTheme();
     }
 }
@@ -128,7 +131,12 @@ function showMapWithTheme() {
     const now = new Date();
     const currentHour = now.getHours() + (now.getMinutes() / 60);
     const isNight = currentHour < sunriseTime || currentHour > sunsetTime;
-    
+
+    // Eliminăm eventualele straturi de bază existente înainte de a adăuga unul nou
+    if (map.hasLayer(lightMap)) lightMap.remove();
+    if (map.hasLayer(darkMap)) darkMap.remove();
+    if (map.hasLayer(satelliteMap)) satelliteMap.remove();
+
     if (isNight) {
         darkMap.addTo(map);
         document.body.classList.add('dark-theme');
@@ -136,6 +144,9 @@ function showMapWithTheme() {
         lightMap.addTo(map);
         document.body.classList.remove('dark-theme');
     }
+
+    document.body.classList.remove('satellite-theme');
+    currentBaseLayerMode = 'auto';
 }
 
 function scheduleNextUpdate() {
@@ -172,29 +183,50 @@ function scheduleNextUpdate() {
 function toggleMapType() {
     const mapIcon = document.querySelector('.map-icon');
     const satelliteIcon = document.querySelector('.satellite-icon');
+    const darkIcon = document.querySelector('.dark-icon');
     const toggleButton = document.getElementById('mapToggle');
     
-    if (map.hasLayer(lightMap) || map.hasLayer(darkMap)) {
-        // Schimbă pe harta satelit
+    // Comutăm între modurile: auto -> dark -> satellite -> auto
+    if (currentBaseLayerMode === 'auto') {
+        // Forțăm modul întunecat
+        if (map.hasLayer(lightMap)) lightMap.remove();
+        if (map.hasLayer(satelliteMap)) satelliteMap.remove();
+        if (!map.hasLayer(darkMap)) darkMap.addTo(map);
+
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('satellite-theme');
+
+        if (mapIcon) mapIcon.style.display = 'none';
+        if (satelliteIcon) satelliteIcon.style.display = 'none';
+        if (darkIcon) darkIcon.style.display = 'block';
+        toggleButton.setAttribute('title', 'Afișează harta satelit');
+
+        currentBaseLayerMode = 'dark';
+    } else if (currentBaseLayerMode === 'dark') {
+        // Trecem pe satelit
         if (map.hasLayer(lightMap)) lightMap.remove();
         if (map.hasLayer(darkMap)) darkMap.remove();
-        satelliteMap.addTo(map);
+        if (!map.hasLayer(satelliteMap)) satelliteMap.addTo(map);
+
         document.body.classList.add('satellite-theme');
-        
-        // Schimbă iconița și titlul
-        mapIcon.style.display = 'none';
-        satelliteIcon.style.display = 'block';
+        document.body.classList.remove('dark-theme');
+
+        if (mapIcon) mapIcon.style.display = 'none';
+        if (satelliteIcon) satelliteIcon.style.display = 'block';
+        if (darkIcon) darkIcon.style.display = 'none';
         toggleButton.setAttribute('title', 'Afișează harta standard');
+
+        currentBaseLayerMode = 'satellite';
     } else {
-        // Revino la harta normală (cu tema corespunzătoare orei zilei)
-        satelliteMap.remove();
+        // Revenim la modul auto (zi/noapte)
         showMapWithTheme();
-        document.body.classList.remove('satellite-theme');
-        
-        // Schimbă iconița și titlul înapoi
-        mapIcon.style.display = 'block';
-        satelliteIcon.style.display = 'none';
-        toggleButton.setAttribute('title', 'Afișează harta satelit');
+
+        if (mapIcon) mapIcon.style.display = 'block';
+        if (satelliteIcon) satelliteIcon.style.display = 'none';
+        if (darkIcon) darkIcon.style.display = 'none';
+        toggleButton.setAttribute('title', 'Afișează harta întunecată');
+
+        currentBaseLayerMode = 'auto';
     }
 }
 
@@ -645,6 +677,26 @@ function centerOnLocation() {
         }
     })();
     
+    // Importăm funcțiile de filtrare după dată
+    const { 
+        formatDate,
+        isWeekend,
+        isDateInRange,
+        getWeekRange,
+        getNextWeekend
+    } = window.DateFilterModule || {};
+
+    // Adăugăm un listener pentru evenimentul de selectare a datei
+    document.addEventListener('dateSelected', (e) => {
+        const selectedDate = e.detail.date;
+        const activeCity = document.getElementById('currentCity')?.textContent || 'Cluj-Napoca';
+        
+        // Reafișăm evenimentele pentru orașul curent cu noua dată selectată
+        if (window.EventsFilterModule) {
+            window.EventsFilterModule.showEventsForCity(activeCity, 'date', selectedDate);
+        }
+    });
+
     // Inițializare filtre evenimente
     document.addEventListener('dateFilterApplied', (e) => {
         const selectedDate = e.detail.date;
@@ -656,36 +708,6 @@ function centerOnLocation() {
             window.EventsFilterModule.showEventsForCity(activeCity, 'calendar', selectedDate);
         }
     });
-});
-
-// Funcție pentru formatarea datei în format YYYY-MM-DD
-function formatDate(date) {
-    const d = new Date(date);
-    let month = '' + (d.getMonth() + 1);
-    let day = '' + d.getDate();
-    const year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-}
-
-// Funcție pentru a verifica dacă o dată este în weekend
-function isWeekend(date) {
-    const day = date.getDay();
-    return day === 0 || day === 6; // 0 = Duminică, 6 = Sâmbătă
-}
-
-// Adăugăm un listener pentru evenimentul de selectare a datei
-document.addEventListener('dateSelected', (e) => {
-    const selectedDate = e.detail.date;
-    const activeCity = document.getElementById('currentCity')?.textContent || 'Cluj-Napoca';
-    
-    if (window.EventsModule && window.EventsModule.showEventsForCity) {
-        window.EventsModule.setCurrentFilter('calendar', selectedDate);
-        window.EventsModule.showEventsForCity(activeCity, 'calendar', selectedDate);
-    }
 });
 
 // Funcție pentru a verifica dacă o dată se potrivește cu filtrul selectat
@@ -726,4 +748,64 @@ function matchesDateFilter(eventDate, filterType, selectedDate = null) {
         default:
             return true;
     }
+}
+
+
+
+// Funcție pentru a deschide navigația
+function openNavigation(lat, lng) {
+    // Verificăm dacă este un dispozitiv iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    // Verificăm dacă este un dispozitiv Android
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    // URL-uri pentru fiecare tip de hartă
+    const urls = {
+        appleMaps: `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`,
+        googleMaps: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,
+        googleMapsApp: `comgooglemaps://?daddr=${lat},${lng}&directionsmode=driving`
+    };
+
+    // Funcție pentru a deschide un URL cu fallback
+    function openWithFallback(url, fallbackUrl) {
+        // Încercăm să deschidem URL-ul principal
+        const newWindow = window.open(url, '_blank');
+        
+        // Verificăm dacă s-a deschis corect
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+            // Dacă avem un fallback, îl încercăm
+            if (fallbackUrl) {
+                window.location.href = fallbackUrl;
+            } else {
+                // Dacă nu avem fallback, arătăm un mesaj
+                alert('Nu s-a putut deschide aplicația de hărți. Vă rugăm instalați Google Maps sau Apple Maps.');
+            }
+        }
+    }
+
+    // Încercăm să deschidem aplicația potrivită în funcție de platformă
+    if (isIOS) {
+        // Pentru iOS, încercăm mai întâi Google Maps App, apoi Apple Maps, apoi Google Maps web
+        if (window.navigator.standalone) {
+            // Dacă aplicația noastră rulează în modul standalone
+            openWithFallback(
+                urls.googleMapsApp,
+                urls.appleMaps
+            );
+        } else {
+            // Dacă rulăm în browser, folosim direct Google Maps web
+            openWithFallback(urls.googleMaps);
+        }
+    } else if (isAndroid) {
+        // Pentru Android, încercăm Google Maps App, apoi Google Maps web
+        openWithFallback(urls.googleMapsApp, urls.googleMaps);
+    } else {
+        // Pentru desktop, folosim direct Google Maps web
+        openWithFallback(urls.googleMaps);
+    }
+    
+    // Prevenim acțiunea implicită a butonului
+    return false;
 }
