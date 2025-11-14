@@ -105,6 +105,7 @@ body {
 }
 
 .event-header {
+    background: rgba(0, 158, 221, 0.9);
     padding: 15px;
     color: white;
     position: relative;
@@ -827,19 +828,18 @@ Stil pentru zilele de weekend .date-btn.weekend {
     border: none !important;
 }
 
-/* .custom-marker { */
-    /* width: 28px;
+.custom-marker { 
+    width: 28px;
     height: 28px;
     background: #6495ed;
     background: transparent;
-    border-radius: 50% 50% 50% 0;
-    position: relative;
-    transform: rotate(-45deg);
+        position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease; */
-/* } */
+    transition: all 0.3s ease;
+}
 
 .custom-marker i {
     color: #3ba55d;
