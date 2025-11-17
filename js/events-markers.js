@@ -15,6 +15,14 @@ const MAP_SETTINGS = {
 let eventMarkers = [];
 let eventMarkersGroup = L.featureGroup();
 
+function syncEventMarkersReference() {
+    if (typeof window !== 'undefined') {
+        window.eventMarkers = eventMarkers;
+    }
+}
+
+syncEventMarkersReference();
+
 // Funcție pentru a șterge markerii evenimentelor
 function clearEventMarkers() {
     try {
@@ -40,6 +48,7 @@ function clearEventMarkers() {
             });
 
             eventMarkers = [];
+            syncEventMarkersReference();
         }
     } catch (e) {
     }
@@ -56,6 +65,7 @@ function updateMapWithFilteredEvents(filteredEvents) {
 
     // Actualizăm array-ul de markeri cu noii markeri
     eventMarkers = [];
+    syncEventMarkersReference();
 
     // Adăugăm markerii la hartă și la grup
     filteredEvents.forEach(event => {

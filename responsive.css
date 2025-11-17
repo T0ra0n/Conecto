@@ -1,3 +1,9 @@
+@media (max-width: 768px) {
+    .events-carousel {
+        bottom: 140px;
+        padding: 10px;
+    }
+}
 @media (min-width: 600px) {
     .categories-scroll {
         justify-content: center;
@@ -47,12 +53,15 @@
     }
 
     .events-list {
-        padding: 10px;
+        padding: 10px 16px;
     }
 
     .event-card {
-        width: 100%;
-        margin: 8px 0;
+        flex: 0 0 85vw;
+        max-width: none;
+        margin: 0 auto 16px;
+        min-width: auto;
+        scroll-snap-align: center;
     }
 
     .date-btn {

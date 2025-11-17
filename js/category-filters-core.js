@@ -59,11 +59,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Distanța în km
 }
 
-// Funcție pentru a crea conținutul popup-ului evenimentului
-function createEventPopup(event) {
-    // Calculăm distanța până la eveniment dacă avem locația curentă
+function buildEventContent(event) {
     let distanceInfo = '';
-    let navigationButton = '';
 
     if (window.currentPosition) {
         const distance = calculateDistance(
@@ -75,27 +72,74 @@ function createEventPopup(event) {
         distanceInfo = `<p><i class="fas fa-route"></i> La ${distance.toFixed(1)} km de tine</p>`;
     }
 
+    const destinationParams = (event.lat && event.lng)
+        ? `destination=${event.lat},${event.lng}`
+        : `destination=${encodeURIComponent(event.location || event.address || event.title)}`;
+
+    const originParams = window.currentPosition
+        ? `&origin=${window.currentPosition.coords.latitude},${window.currentPosition.coords.longitude}`
+        : '';
+
+    const navigationLink = `https://www.google.com/maps/dir/?api=1&${destinationParams}${originParams}`;
+
+    const navigationButton = `
+        <a class="navigation-btn" href="${navigationLink}" target="_blank" rel="noopener">
+            <i class="fas fa-location-arrow"></i>
+            Navigheaza
+        </a>
+    `;
+
+    const eventImage = event.image
+        ? `<img src="${event.image}" alt="${event.title}" class="event-details-image" />`
+        : '<div class="event-details-image event-image-fallback"></div>';
+
+    return `
+        <div class="event-body">
+            <div class="event-details-layout">
+                <div class="event-details-text">
+                    <div class="event-header-content">
+                        <h3>${event.title}</h3>
+                    </div>
+                    <div class="event-details">
+                        <p><i class="far fa-calendar-alt"></i> ${event.date} • ${event.time}</p>
+                        <p class="event-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span class="event-location-text">
+                                <span class="event-location-name">${event.location}</span>
+                                <span class="event-address">${event.address}</span>
+                            </span>
+                        </p>
+                        <p><i class="fas fa-tag"></i> ${event.price}</p>
+                        ${distanceInfo}
+                    </div>
+                </div>
+                <div class="event-details-media" data-event-id="${event.id}">
+                    ${eventImage}
+                </div>
+            </div>
+            <div class="event-description-container">
+                <p class="event-description">${event.description}</p>
+            </div>
+            ${navigationButton}
+        </div>
+    `;
+}
+
+// Funcție pentru a crea conținutul popup-ului evenimentului
+function createEventPopup(event) {
     return `
         <div class="event-popup">
-            <div class="event-header">
-                <h3>${event.title}</h3>
-                <div class="event-category">${event.category}</div>
-            </div>
-            <div class="event-body">
-                <div class="event-details">
-                    <p><i class="far fa-calendar-alt"></i> ${event.date} • ${event.time}</p>
-                    <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
-                    <p><i class="fas fa-tag"></i> ${event.price}</p>
-                    ${distanceInfo}
-                </div>
-                <p class="event-description">${event.description}</p>
-                <div class="event-address">
-                    <i class="fas fa-info-circle"></i> ${event.address}
-                </div>
-                ${navigationButton}
-                </div>
-            </div>
+            ${buildEventContent(event)}
         </div>
+    `;
+}
+
+// Funcție pentru cardul din carusel
+function createEventCard(event) {
+    return `
+        <article class="event-card" data-event-id="${event.id}">
+            ${buildEventContent(event)}
+        </article>
     `;
 }
 

@@ -12,6 +12,10 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // === 2. Variabile globale și acces la filtrele de dată ===
 let currentSelectedDate = null; // Stochează data selectată din DateFilter
+let currentActiveEventId = null;
+let carouselInteractionsAttached = false;
+let carouselScrollListenerAttached = false;
+let carouselScrollRaf = null;
 
 const DateFilterFunctions = window.DateFilterModule || {};
 
@@ -21,6 +25,195 @@ const callDateFilterFunction = (fnName, ...args) => {
     }
     return null;
 };
+
+// === Utilitare sincronizare hartă <-> carusel ===
+function refreshMarkerReference() {
+    if (typeof window !== 'undefined' && typeof eventMarkers !== 'undefined') {
+        window.eventMarkers = eventMarkers;
+    }
+}
+
+function setActiveEvent(eventId, { scrollCard = true, panMap = true } = {}) {
+    if (!eventId) {
+        return;
+    }
+
+    currentActiveEventId = eventId;
+    highlightCarouselCard(eventId, scrollCard);
+    highlightMapMarker(eventId, panMap);
+}
+
+function highlightCarouselCard(eventId, scrollIntoView = true) {
+    const cards = document.querySelectorAll('.event-card');
+    let targetCard = null;
+
+    cards.forEach(card => {
+        const isActive = eventId && card.dataset.eventId === String(eventId);
+        card.classList.toggle('active', isActive);
+        if (isActive) {
+            targetCard = card;
+        }
+    });
+
+    if (scrollIntoView && targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+}
+
+function flyToMarker(marker) {
+    if (!marker || typeof map === 'undefined' || !map) {
+        return;
+    }
+
+    const latLng = marker.getLatLng?.();
+    if (!latLng) {
+        return;
+    }
+
+    map.flyTo(latLng, Math.max(map.getZoom(), 14), {
+        duration: 0.6,
+        easeLinearity: 0.25
+    });
+}
+
+function highlightMapMarker(eventId, panToMarker = false) {
+    refreshMarkerReference();
+    const markersCollection = (typeof eventMarkers !== 'undefined' && eventMarkers) || window.eventMarkers;
+    if (!Array.isArray(markersCollection) || markersCollection.length === 0) {
+        return;
+    }
+
+    markersCollection.forEach(marker => {
+        if (!marker) {
+            return;
+        }
+
+        const markerEventId = marker.eventId || marker.options?.eventId;
+        const iconElement = marker._icon;
+        const isActive = !!eventId && markerEventId === eventId;
+
+        if (iconElement) {
+            iconElement.classList.toggle('marker-active', isActive);
+
+            const customMarker = iconElement.querySelector('.custom-marker');
+            if (customMarker) {
+                customMarker.classList.toggle('active', isActive);
+                customMarker.classList.toggle('marker-bounce', isActive);
+            }
+        }
+
+        if (isActive && panToMarker) {
+            flyToMarker(marker);
+        }
+    });
+}
+
+function attachCarouselInteractions() {
+    const carousel = document.getElementById('eventsCarousel');
+    if (!carousel || carouselInteractionsAttached) {
+        return;
+    }
+
+    carousel.addEventListener('click', (event) => {
+        const card = event.target.closest('.event-card');
+        if (!card) {
+            return;
+        }
+        const eventId = card.dataset.eventId;
+        if (!eventId) {
+            return;
+        }
+        setActiveEvent(eventId, { scrollCard: false, panMap: true });
+    });
+
+    carouselInteractionsAttached = true;
+
+    attachCarouselScrollSync(carousel);
+}
+
+function syncActiveEventState(eventList) {
+    if (!eventList || eventList.length === 0) {
+        currentActiveEventId = null;
+        highlightCarouselCard(null, false);
+        highlightMapMarker(null, false);
+        return;
+    }
+
+    const hasCurrent = currentActiveEventId && eventList.some(evt => evt.id === currentActiveEventId);
+    if (!hasCurrent) {
+        currentActiveEventId = eventList[0]?.id || null;
+    }
+
+    if (currentActiveEventId) {
+        requestAnimationFrame(() => highlightCarouselCard(currentActiveEventId, false));
+        requestAnimationFrame(() => highlightMapMarker(currentActiveEventId, false));
+    }
+}
+
+function attachCarouselScrollSync(carousel) {
+    if (carouselScrollListenerAttached || !carousel) {
+        return;
+    }
+
+    const handleCarouselScroll = () => {
+        if (carouselScrollRaf) {
+            cancelAnimationFrame(carouselScrollRaf);
+        }
+        carouselScrollRaf = requestAnimationFrame(() => {
+            carouselScrollRaf = null;
+            syncActiveEventWithCenteredCard();
+        });
+    };
+
+    carousel.addEventListener('scroll', handleCarouselScroll, { passive: true });
+    carouselScrollListenerAttached = true;
+}
+
+function getCenteredCarouselCard() {
+    const carousel = document.getElementById('eventsCarousel');
+    if (!carousel) {
+        return null;
+    }
+
+    const cards = carousel.querySelectorAll('.event-card');
+    if (!cards.length) {
+        return null;
+    }
+
+    const carouselRect = carousel.getBoundingClientRect();
+    const targetX = carouselRect.left + (carouselRect.width / 2);
+    let closestCard = null;
+    let minDistance = Infinity;
+
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.left + (rect.width / 2);
+        const distance = Math.abs(targetX - cardCenter);
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestCard = card;
+        }
+    });
+
+    return closestCard;
+}
+
+function syncActiveEventWithCenteredCard() {
+    const centeredCard = getCenteredCarouselCard();
+    if (!centeredCard) {
+        return;
+    }
+
+    const eventId = centeredCard.dataset.eventId;
+    if (!eventId || eventId === currentActiveEventId) {
+        return;
+    }
+
+    setActiveEvent(eventId, { scrollCard: false, panMap: true });
+}
+
+window.setActiveEvent = setActiveEvent;
+window.eventMarkers = window.eventMarkers || [];
 
 // === 3. UI pentru filtrele de categorie (butoane + badge număr evenimente) ===
 function updateCategoryCount(button) {
@@ -232,7 +425,8 @@ function applyCategoryFilter(cityName, category) {
             const marker = L.marker([event.lat, event.lng], {
                 title: event.title,
                 alt: event.title,
-                riseOnHover: true
+                riseOnHover: true,
+                eventId: event.id
             });
 
             // Adăugăm un popup cu informații despre eveniment
@@ -245,12 +439,21 @@ function applyCategoryFilter(cityName, category) {
                 </div>`;
 
             marker.bindPopup(popupContent);
+            marker.eventId = event.id;
+            marker.on('click', () => {
+                setActiveEvent(event.id, { scrollCard: true, panMap: false });
+                marker.openPopup();
+            });
 
             markersGroup.addLayer(marker);
             eventMarkers.push(marker);
         } catch (error) {
         }
     });
+
+    refreshMarkerReference();
+
+    updateEventsCarousel(filteredEvents);
 
     // Adăugăm grupul pe hartă
     markersGroup.addTo(map);
@@ -273,6 +476,28 @@ function applyCategoryFilter(cityName, category) {
 function updateAllCategoryCounts() {
     const categoryButtons = document.querySelectorAll('.category-btn');
     categoryButtons.forEach(updateCategoryCount);
+}
+
+function updateEventsCarousel(eventList = []) {
+    const carousel = document.getElementById('eventsCarousel');
+    if (!carousel) {
+        return;
+    }
+
+    if (!eventList || eventList.length === 0) {
+        carousel.innerHTML = `
+            <div class="events-carousel-empty">
+                <i class="far fa-calendar-times"></i>
+                <span>Niciun eveniment pentru filtrele curente.</span>
+            </div>
+        `;
+        return;
+    }
+
+    const cardsMarkup = eventList.map(createEventCard).join('');
+    carousel.innerHTML = cardsMarkup;
+    syncActiveEventState(eventList);
+    attachCarouselInteractions();
 }
 
 document.addEventListener('dateSelected', (e) => {
@@ -351,10 +576,12 @@ window.EventsFilterModule = {
         const currentDistance = window.currentDistanceFilter;
         if (currentDistance) {
             filteredEvents = filteredEvents.filter(event => {
-                const eventDistance = parseFloat(event.distance) || 0;
-                return eventDistance <= currentDistance;
-            });
-        }
+            const eventDistance = parseFloat(event.distance) || 0;
+            return eventDistance <= currentDistance;
+        });
+    }
+
+        updateEventsCarousel(filteredEvents);
 
         if (!filteredEvents || filteredEvents.length === 0) {
             return;
@@ -383,7 +610,9 @@ window.EventsFilterModule = {
                     })
                 }).bindPopup(createEventPopup(event));
 
+                marker.eventId = event.id;
                 marker.on('click', function () {
+                    setActiveEvent(event.id, { scrollCard: true, panMap: false });
                     const targetLatLng = L.latLng(event.lat, event.lng);
                     const targetPoint = map.project(targetLatLng);
                     const offsetPoint = L.point(
@@ -391,6 +620,10 @@ window.EventsFilterModule = {
                         targetPoint.y + MAP_SETTINGS.FLY_TO_OFFSET_Y
                     );
                     const offsetLatLng = map.unproject(offsetPoint);
+                    map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 14), {
+                        duration: 0.6,
+                        easeLinearity: 0.25
+                    });
                     setTimeout(() => marker.openPopup(), 300);
                 });
 
@@ -399,6 +632,8 @@ window.EventsFilterModule = {
             } catch (error) {
             }
         });
+
+        refreshMarkerReference();
 
         markersGroup.addTo(map);
 
