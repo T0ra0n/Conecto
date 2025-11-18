@@ -114,43 +114,87 @@ body {
     gap: 10px;
     padding: 16px;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x proximity;
     z-index: 1500;
     pointer-events: auto;
+    color: #111;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    scroll-snap-align: start;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    -webkit-overflow-scrolling: touch;
 }
 
-.events-carousel::-webkit-scrollbar {
+body[data-events-view="popup"] .events-carousel {
     display: none;
 }
 
-.events-carousel {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+body[data-events-view="horizontal"] .events-carousel {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+}
+
+body[data-events-view="vertical"] .events-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 65vh;
+    width: min(420px, 90vw);
+    margin: 0 auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: 120px;
+    scroll-snap-type: y proximity;
+    gap: 14px;
+}
+
+body[data-events-view="vertical"] .events-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+body[data-events-view="vertical"] .event-card {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
 }
 
 .event-card {
-    min-width: 280px;
-    max-width: 320px;
-    /* background: rgba(255, 255, 255, 0.96); */
-    color: #111;
+    flex: 0 0 300px;
+    background: rgba(30, 30, 30, 0.85);
+    border: 1px solid rgba(100, 100, 100, 0.3);
     border-radius: 12px;
-    border: 2px solid #50505051;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
     scroll-snap-align: start;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin: 2px;
 }
 
-.event-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
-}
+/* .event-card:hover {
+    box-shadow: 0 px 15px rgba(0, 0, 0, 0.25);
+    border-color: rgba(100, 149, 237, 0.6);
+} */
 
 .event-card.active {
-    border-color: #6495ed;
-    box-shadow: 0 0 20px rgba(100, 149, 237, 0.5);
-    transform: translateY(-6px);
+    /* border: 2px solid #3a86ff; */
+    box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.3), 0 8px 32px rgba(58, 134, 255, 0.4);
+    background: rgba(35, 35, 35, 0.5);
+    position: relative;
+    z-index: 1;
 }
 
 .events-carousel-empty {
@@ -205,6 +249,7 @@ body {
     display: flex;
     align-items: stretch;
     justify-content: center;
+    flex-direction: column;
 }
 
 .event-details-image,
@@ -220,10 +265,6 @@ body {
 
 .event-image-fallback {
     background: linear-gradient(135deg, #00a8ff, #005bea);
-}
-
-.event-description-container {
-    /* margin-top: 12px; */
 }
 
 .event-details {
@@ -975,6 +1016,8 @@ text-shadow: none;
 color: #fdfdfd;
 transform: scale(1.1);
 box-shadow: 0 0 18px rgba(100, 149, 237, 0.85);
+background: linear-gradient(135deg, #ff8a00, #e52e71);
+border-color: rgba(255, 255, 255, 0.95);
 }
 
 .marker-active .custom-marker {
