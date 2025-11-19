@@ -1,6 +1,6 @@
 @media (max-width: 768px) {
     .events-carousel {
-        bottom: 140px;
+        bottom: 0px;
         padding: 10px;
     }
 }
@@ -21,19 +21,18 @@
         padding: 0;
         background: rgba(49, 51, 56, 0.1);
         backdrop-filter: blur(10px);
-        /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
         border-bottom: none;
     }
 }
 
 
-/* Stiluri pentru ecrane mici */
-/* Resetare dimensiuni pentru toate elementele */
+
 * {
     box-sizing: border-box;
 }
 
-/* Stiluri pentru ecrane mici */
+
 @media (max-width: 768px) {
 
     html,
@@ -59,7 +58,6 @@
     .event-card {
         flex: 0 0 85vw;
         max-width: none;
-        margin: 0 auto 16px;
         min-width: auto;
         scroll-snap-align: center;
     }
@@ -90,12 +88,6 @@
         gap: 6px;
     }
 
-   
-
-    .map-container {
-        width: 100% !important;
-        height: 100vh !important;
-    }
 
 
     .category-btn {
@@ -123,12 +115,6 @@
     -webkit-appearance: none;
 }
 
-    #map {
-        position: relative;
-        height: 100%;
-        width: 100%;
-        transition: filter 0.3s ease;
-        box-shadow: var(--neon-glow);
-    }
+
 
 }

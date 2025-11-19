@@ -18,9 +18,18 @@
     box-sizing: border-box;
 }
 
+html,
 body {
+    height: 100%;
     margin: 0;
     padding: 0;
+}
+
+body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     font-family: 'Roboto', sans-serif;
     background-color: var(--bg-dark);
     color: var(--text-light);
@@ -28,16 +37,53 @@ body {
     overflow-y: auto;
 }
 
+/* Stiluri pentru butonul de comutare a vizualizărilor */
+.events-view-switch {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    /* Înălțime fixă pentru a se potrivi cu bara de căutare */
+    margin-right: 0;
+    /* Spațiu între buton și bara de căutare */
+}
+
+.view-toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 0 8px;
+    cursor: pointer;
+    height: 36px;
+    /* Puțin mai mic decât containerul pentru aspect estetic */
+    min-width: 36px;
+    /* Lățime minimă pentru a asigura spațiu adecvat */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.view-toggle-btn:active {
+    background: transparent;
+    color: var(--text-light);
+}
+
 /* Stiluri pentru containerul hărții */
 .map-container {
+    flex: 1;
+    /* Ocupă tot spațiul disponibil */
     position: relative;
-    height: calc(100vh);
-    /* Scădem înălțimea header-ului și a filtrelor */
     width: 100%;
     z-index: 1;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    position: relative;
 }
 
 
@@ -75,59 +121,170 @@ body {
 }
 
 .event-details p {
-    margin: 5px 0;
+    margin: 0px 0;
     display: flex;
     align-items: center;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #e7e7e7;
+    gap: 8px;
 }
 
+.event-details i {
+    width: 16px;
+    min-width: 16px;
+    text-align: center;
+    color: #bbbbbb;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .leaflet-popup-content-wrapper {
     padding: 0;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    bottom: 1000px;
-    left: 1000px;
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 100, 100, 0.3);
 }
 
 .leaflet-popup-content {
     margin: 0;
-    width: 280px !important;
-    bottom: 1000px;
-    left: 1000px;
+    width: 300px !important;
+    max-height: 80vh;
+    overflow-y: auto;
+}
 
+.leaflet-popup-tip {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(100, 100, 100, 0.3);
+    /* border-bottom-color: transparent;
+    border-right-color: transparent; */
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-close-button {
+    color: #bbbbbb;
+    font-size: 20px;
+    padding: 8px 10px 0 0;
+    transition: color 0.2s;
+}
+
+.leaflet-popup-close-button:hover {
+    color: #ffffff;
+    background: none;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: #bbbbbb;
 }
 
 .event-popup {
     font-family: 'Roboto', sans-serif;
-    color: #333;
-    bottom: 1000px;
-    left: 1000px;
+    color: #f0f0f0;
+    background: rgba(30, 30, 30, 0.95);
+}
+
+.event-popup .event-body {
+    background: transparent;
+    padding: 15px;
+}
+
+.event-popup .event-details-layout {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.event-popup .event-details-text {
+    flex: 1;
+}
+
+.event-popup .event-header-content h3 {
+    color: #dda864;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.event-popup .event-details p {
+    margin: 6px 0;
+    font-size: 13px;
+    color: #bbbbbb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.event-popup .event-details i {
+    width: 16px;
+    text-align: center;
+    color: #888;
+}
+
+.event-popup .event-description {
+    margin: 12px 0;
+    color: #ccc;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.event-popup .navigation-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px 15px;
+    background: #4a6cf7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+}
+
+.event-popup .navigation-btn i {
+    margin-right: 8px;
+}
+
+.event-popup .navigation-btn:hover {
+    background: #3a5ce4;
 }
 
 .events-carousel {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 140px;
+    bottom: 0px;
     display: flex;
     gap: 10px;
     padding: 16px;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x proximity;
+    scroll-snap-type: x mandatory;
     z-index: 1500;
     pointer-events: auto;
     color: #111;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    scroll-snap-align: start;
+    /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); */
+    scroll-behavior: smooth;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+    scroll-padding: 0 16px;
 }
 
-body[data-events-view="popup"] .events-carousel {
+.events-carousel::-webkit-scrollbar {
     display: none;
+    /* Chrome, Safari, Opera */
 }
 
 body[data-events-view="horizontal"] .events-carousel {
@@ -137,72 +294,40 @@ body[data-events-view="horizontal"] .events-carousel {
     justify-content: flex-start;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x proximity;
-}
-
-body[data-events-view="vertical"] .events-carousel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 65vh;
-    width: min(420px, 90vw);
-    margin: 0 auto;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    bottom: 120px;
-    scroll-snap-type: y proximity;
-    gap: 14px;
-}
-
-body[data-events-view="vertical"] .events-carousel::-webkit-scrollbar {
-    display: none;
-}
-
-body[data-events-view="vertical"] .event-card {
-    min-width: 100%;
-    max-width: 100%;
-    width: 100%;
+    scroll-snap-type: x mandatory;
 }
 
 .event-card {
-    flex: 0 0 300px;
-    background: rgba(30, 30, 30, 0.85);
-    border: 1px solid rgba(100, 100, 100, 0.3);
+    flex: 0 0 auto;
+    width: 300px;
+    height: auto;
+    background:transparent;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(124, 124, 124, 0.2);
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
-    scroll-snap-align: start;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    margin: 2px;
+    scroll-snap-align: center;
+    /* box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15); */
+    scroll-margin: 0 16px;
 }
 
 /* .event-card:hover {
     box-shadow: 0 px 15px rgba(0, 0, 0, 0.25);
     border-color: rgba(100, 149, 237, 0.6);
+}
 } */
 
-.event-card.active {
-    /* border: 2px solid #3a86ff; */
-    box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.3), 0 8px 32px rgba(58, 134, 255, 0.4);
-    background: rgba(35, 35, 35, 0.5);
-    position: relative;
-    z-index: 1;
-}
 
 .events-carousel-empty {
     width: 100%;
     text-align: center;
     color: #ddd;
     padding: 20px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -218,15 +343,14 @@ body[data-events-view="vertical"] .event-card {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     font-size: 14px;
-    font-weight: 400;
-    color: #fdfdfd;
+    font-weight: 500;
+    color:#dda864;
 }
 
 .event-body {
-    background: rgba(26, 26, 26, 0.462);
-    backdrop-filter: blur(10px);
+    background: transparent;
     padding: 15px;
-  }
+}
 
 .event-details-layout {
     position: relative;
@@ -239,9 +363,8 @@ body[data-events-view="vertical"] .event-card {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 3px;
 }
-
 
 .event-details-media {
     flex: 0 0 35%;
@@ -267,31 +390,13 @@ body[data-events-view="vertical"] .event-card {
     background: linear-gradient(135deg, #00a8ff, #005bea);
 }
 
-.event-details {
-    margin-bottom: 0;
-}
-
-.event-details p {
-    font-family: 'Roboto', sans-serif;
-    margin: 5px 0;
-    font-size: 12px;
-    color: #fdfdfd;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.event-details i {
-    width: 16px;
-    text-align: center;
-    color: #bbbbbb;
-}
-
 .event-location {
     font-family: 'Roboto', sans-serif;
     display: flex;
     align-items: flex-start;
-    gap: 6px;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .event-location-text {
@@ -306,10 +411,13 @@ body[data-events-view="vertical"] .event-card {
     text-overflow: ellipsis;
 }
 
-.event-location-name {
-    font-weight: 200;
+.event-location i {
     color: #bbbbbb;
-    margin-right: 4px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    min-width: 16px;
+    margin-top: 0;
 }
 
 .event-description {
@@ -340,13 +448,13 @@ body[data-events-view="vertical"] .event-card {
 /* Stiluri pentru filtrele de evenimente */
 .events-filter {
     position: relative;
-    display: flex;  
+    display: flex;
     bottom: 0;
     left: 0;
     right: 0;
     align-items: center;
     justify-content: flex-start;
-    background: rgba(0, 0, 0, 0.1);
+    background: transparent;
     width: 100%;
     position: relative;
     display: flex;
@@ -358,12 +466,9 @@ body[data-events-view="vertical"] .event-card {
     white-space: nowrap;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: 0;
-    border: none;
     padding: 0;
     box-sizing: border-box;
-    border-top: 1px solid rgba(100, 149, 237, 0.2);
-    min-height: 70px;
+    border: none;
     z-index: 1000;
 }
 
@@ -398,8 +503,6 @@ body[data-events-view="vertical"] .event-card {
     font-family: 'Roboto', sans-serif;
 }
 
-
-
 .date-btn.active {
     background: #6495ed;
     color: white;
@@ -431,7 +534,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     color: #ffffffde;
 }
 
-
 .filter-buttons-container {
     display: flex;
     width: 100%;
@@ -443,7 +545,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     justify-content: center;
     padding: 0 5px;
 }
-
 
 /* Ascundem scrollbar-ul pentru Chrome/Safari */
 .events-filter::-webkit-scrollbar {
@@ -498,26 +599,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     /* Permite butoanelor să ocupe spațiu disponibil */
 }
 
-/* Stiluri container filtre */
-.filters-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 2000;
-    background: transparent;
-    /* Eliminăm fundalul */
-    backdrop-filter: none;
-    /* Eliminăm blur-ul */
-    border: none;
-    /* Eliminăm bordura */
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-    /* Reducem spațiul dintre elemente */
-}
-
 /* Stiluri filtre categorii */
 .categories-filter {
     width: 100%;
@@ -525,10 +606,12 @@ Stil pentru zilele de weekend .date-btn.weekend {
     display: flex;
     flex-direction: column;
     padding: 8px 0 0px 0px;
-    background: rgba(40, 44, 52, 0.1);
+    background: transparent;
     backdrop-filter: blur(10px);
-    /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
-    border-bottom: none;
+    border: none;
+    border-top: 1px solid rgba(124, 124, 124, 0.2);
+    border-bottom: 1px solid rgba(124, 124, 124, 0.2);
+
 }
 
 .categories-scroll {
@@ -612,7 +695,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     -webkit-appearance: none;
 }
 
-
 .category-btn:focus {
     outline: none;
 }
@@ -651,7 +733,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     letter-spacing: 0.3px;
 }
 
-
 /* Stiluri pentru bara de căutare */
 .search-container {
     position: absolute;
@@ -667,7 +748,7 @@ Stil pentru zilele de weekend .date-btn.weekend {
     gap: 5px;
     max-width: 600px;
     width: 100%;
-    flex-direction: column;
+    flex-direction: row;
 }
 
 .search-container>* {
@@ -845,17 +926,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     /* Violet mai intens la hover */
 }
 
-#map {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: filter 0.3s ease;
-    box-shadow: var(--neon-glow);
-}
-
-.search-active #map {
-    filter: brightness(0.7);
-}
 
 /* Ascundem butoalele de zoom */
 .leaflet-control-zoom {
@@ -892,10 +962,6 @@ Stil pentru zilele de weekend .date-btn.weekend {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
-/* Ascundem butonul de schimbare a hărții */
-/* #mapToggle {
-    display: none !important;
-} */
 
 /* Stiluri pentru tema satelit */
 .satellite-theme .location-info {
@@ -987,37 +1053,37 @@ Stil pentru zilele de weekend .date-btn.weekend {
 
 /* Stiluri pentru markerii personalizați */
 .custom-marker-container {
-background: transparent !important;
-border: none !important;
+    background: transparent !important;
+    border: none !important;
 }
 
-.custom-marker { 
-width: 36px;
-height: 36px;
-border-radius: 50%;
-background: linear-gradient(135deg, #4b6ef5, #6dd5fa);
-border: 2px solid rgba(255, 255, 255, 0.8);
-color: #ffffff;
-display: flex;
-align-items: center;
-justify-content: center;
-box-shadow: 0 6px 15px rgba(0, 0, 0, 0.35);
-transition: transform 0.3s ease, box-shadow 0.3s ease;
+.custom-marker {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4b6ef5, #6dd5fa);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .custom-marker i {
-color: inherit;
-font-size: 18px;
-transform: none;
-text-shadow: none;
+    color: inherit;
+    font-size: 18px;
+    transform: none;
+    text-shadow: none;
 }
 
 .custom-marker.active {
-color: #fdfdfd;
-transform: scale(1.1);
-box-shadow: 0 0 18px rgba(100, 149, 237, 0.85);
-background: linear-gradient(135deg, #ff8a00, #e52e71);
-border-color: rgba(255, 255, 255, 0.95);
+    color: #fdfdfd;
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(100, 149, 237, 0.85);
+    background: linear-gradient(135deg, #ff8a00, #e52e71);
+    border-color: rgba(255, 255, 255, 0.95);
 }
 
 .marker-active .custom-marker {
@@ -1029,9 +1095,12 @@ border-color: rgba(255, 255, 255, 0.95);
 }
 
 @keyframes marker-bounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-6px);
     }
@@ -1063,15 +1132,16 @@ body:not(.dark-theme):not(.satellite-theme) .categories-filter {
 }
 
 body:not(.dark-theme):not(.satellite-theme) .events-filter {
-   background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 
 
-body:not(.dark-theme):not(.satellite-theme) .category-btn.active, .category-btn i {
-    color: #757575;
+body:not(.dark-theme):not(.satellite-theme) .category-btn.active,
+.category-btn i {
+    color: #f8f8f8;
 }
 
 

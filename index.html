@@ -14,6 +14,15 @@
 
 <body>
     <div class="search-container">
+        <div class="events-view-switch" id="eventsViewSwitch" title="Schimbă modul de afișare">
+            <button class="view-toggle-btn" id="eventsViewToggle" data-view="horizontal" type="button"
+                aria-label="Schimbă modul de afișare">
+                <span class="view-toggle-icon fas fa-map-marker-alt" data-view="markers"
+                    title="Afișează doar markeri"></span>
+                <span class="view-toggle-icon fas fa-grip-lines" data-view="horizontal"
+                    title="Afișează în carusel orizontal"></span>
+            </button>
+        </div>
         <div class="search-box">
             <input type="text" id="citySearch" placeholder="Caută localitate..." autocomplete="off">
             <div class="map-controls">
@@ -25,34 +34,28 @@
                 </button>
                 <button class="map-toggle-btn" id="mapToggle" title="Afișează harta satelit">
                     <img src="Content\Satellite.jpeg" alt="Hartă" class="map-toggle-img map-icon" />
-                    <img src="Content\Black.png" alt="Hartă întunecată" class="map-toggle-img dark-icon" style="display: none;" />
-                    <img src="Content\Map.png" alt="Satelit" class="map-toggle-img satellite-icon" style="display: none;" />
+                    <img src="Content\Black.png" alt="Hartă întunecată" class="map-toggle-img dark-icon"
+                        style="display: none;" />
+                    <img src="Content\Map.png" alt="Satelit" class="map-toggle-img satellite-icon"
+                        style="display: none;" />
                 </button>
             </div>
         </div>
         <div id="searchResults" class="search-results"></div>
     </div>
+
     <div class="map-container">
         <div id="map"></div>
+        <div class="events-carousel" id="eventsCarousel"></div>
     </div>
 
-    <div class="events-carousel" id="eventsCarousel">
-        <!-- Cardurile evenimentelor filtrate vor fi inserate dinamic -->
-    </div>
 
-    <!-- Filtre categorii evenimente -->
     <!-- Container principal pentru toate filtrele -->
     <div class="filters-container">
-        <div class="events-view-switch" id="eventsViewSwitch">
-            <button class="view-toggle-btn view-toggle-single" id="eventsViewToggle" data-view="horizontal" type="button">
-                <span class="view-toggle-icon fas fa-arrows-left-right" aria-hidden="true"></span>
-                <span class="view-toggle-label">Carusel orizontal</span>
-            </button>
-        </div>
-        <!-- Filtre categorii evenimente -->
         <div class="categories-filter">
             <div class="categories-scroll">
-                <button class="category-btn active" data-category="all"><i class="fas fa-map-marker-alt"></i> Toate</button>
+                <button class="category-btn active" data-category="all"><i class="fas fa-map-marker-alt"></i>
+                    Toate</button>
                 <button class="category-btn" data-category="muzica"><i class="fas fa-music"></i> Muzică</button>
                 <button class="category-btn" data-category="film"><i class="fas fa-film"></i> Film</button>
                 <button class="category-btn" data-category="jocuri"><i class="fas fa-gamepad"></i> Jocuri</button>
@@ -73,14 +76,15 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="js/map.js"></script>   
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/map.js"></script>
     <script src="js/date-filter.js"></script>
     <script src="js/events.js"></script>
     <script src="js/category-filters-core.js"></script>
     <script src="js/events-markers.js"></script>
     <script src="js/events-filters-ui.js"></script>
-    
+
 </body>
 
 </html>

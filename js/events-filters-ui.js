@@ -17,28 +17,19 @@ let carouselInteractionsAttached = false;
 let carouselScrollListenerAttached = false;
 let carouselScrollRaf = null;
 
-const EventsViewModes = Object.freeze({
-    POPUP: 'popup',
+const EventsViewModes = {
     HORIZONTAL: 'horizontal',
-    VERTICAL: 'vertical'
-});
-const VIEW_MODE_SEQUENCE = [
-    EventsViewModes.POPUP,
-    EventsViewModes.HORIZONTAL,
-    EventsViewModes.VERTICAL
-];
+    MARKERS: 'markers'
+};
+
 const EventsViewModeConfig = {
-    [EventsViewModes.POPUP]: {
-        label: 'Popup-uri',
-        icon: 'fas fa-map'
-    },
     [EventsViewModes.HORIZONTAL]: {
         label: 'Carusel orizontal',
-        icon: 'fas fa-arrows-left-right'
+        icon: 'fa-th-large'
     },
-    [EventsViewModes.VERTICAL]: {
-        label: 'Carusel vertical',
-        icon: 'fas fa-arrows-up-down'
+    [EventsViewModes.MARKERS]: {
+        label: 'Doar markeri',
+        icon: 'fa-map-marker-alt'
     }
 };
 let currentEventsViewMode = EventsViewModes.HORIZONTAL;
@@ -59,10 +50,6 @@ function syncCarouselViewState() {
     carousel.setAttribute('data-view-mode', currentEventsViewMode);
 }
 
-function arePopupsEnabled() {
-    return currentEventsViewMode === EventsViewModes.POPUP;
-}
-
 function configureMarkerPopup(marker, popupContent = null) {
     if (!marker) {
         return;
@@ -74,7 +61,8 @@ function configureMarkerPopup(marker, popupContent = null) {
 
     const hasPopup = typeof marker.getPopup === 'function' && !!marker.getPopup();
 
-    if (arePopupsEnabled()) {
+    // Popups sunt activate doar în modul MARKERS
+    if (currentEventsViewMode === EventsViewModes.MARKERS) {
         if (!hasPopup && marker._eventPopupContent) {
             marker.bindPopup(marker._eventPopupContent);
         }
@@ -100,24 +88,31 @@ function refreshMarkersPopupState() {
 
 function updateEventsViewToggleButton(view) {
     const toggleButton = document.getElementById('eventsViewToggle');
-    if (!toggleButton) {
-        return;
+    if (!toggleButton) return;
+
+    // Ascunde toate iconițele
+    document.querySelectorAll('.view-toggle-icon').forEach(icon => {
+        icon.style.display = 'none';
+    });
+
+    // Cu doar 2 moduri, următorul este celălalt
+    const nextView = view === EventsViewModes.HORIZONTAL ? EventsViewModes.MARKERS : EventsViewModes.HORIZONTAL;
+    
+    // Afișează iconița pentru următoarea vizualizare
+    const iconToShow = nextView === EventsViewModes.HORIZONTAL 
+        ? document.querySelector('.view-toggle-icon.fa-grip-lines')
+        : document.querySelector('.view-toggle-icon.fa-map-marker-alt');
+
+    if (iconToShow) {
+        iconToShow.style.display = 'inline-block';
     }
 
-    const config = EventsViewModeConfig[view] || {};
-    const iconElement = toggleButton.querySelector('.view-toggle-icon');
-    const labelElement = toggleButton.querySelector('.view-toggle-label');
-
-    toggleButton.dataset.view = view;
-    toggleButton.setAttribute('aria-label', `Schimbă modul de afișare (${config.label || ''})`);
-
-    if (iconElement && config.icon) {
-        iconElement.className = `view-toggle-icon ${config.icon}`;
-    }
-
-    if (labelElement && config.label) {
-        labelElement.textContent = config.label;
-    }
+    // Actualizează titlul butonului
+    const nextConfig = EventsViewModeConfig[nextView] || {};
+    const currentConfig = EventsViewModeConfig[view] || {};
+    
+    toggleButton.setAttribute('title', `Schimbă în modul: ${nextConfig.label}`);
+    toggleButton.setAttribute('aria-label', `Schimbă în modul: ${nextConfig.label} (acum: ${currentConfig.label})`);
 }
 
 function setEventsViewMode(view) {
@@ -131,21 +126,20 @@ function setEventsViewMode(view) {
         document.body.setAttribute('data-events-view', view);
     }
 
-    document.querySelectorAll('.view-toggle-btn').forEach(button => {
-        const isActive = button.dataset.view === view;
-        button.classList.toggle('active', isActive);
-        button.setAttribute('aria-pressed', String(isActive));
-    });
-
-    const carousel = document.getElementById('eventsCarousel');
-    if (carousel) {
-        const isPopupMode = view === EventsViewModes.POPUP;
-        carousel.setAttribute('aria-hidden', String(isPopupMode));
-        if (isPopupMode) {
-            carousel.setAttribute('tabindex', '-1');
-        } else {
-            carousel.removeAttribute('tabindex');
-        }
+    const carousel = document.querySelector('.events-carousel');
+    
+    switch(view) {
+        case EventsViewModes.HORIZONTAL:
+            if (carousel) {
+                carousel.style.display = 'flex';
+            }
+            break;
+            
+        case EventsViewModes.MARKERS:
+            if (carousel) {
+                carousel.style.display = 'none';
+            }
+            break;
     }
 
     syncCarouselViewState();
@@ -164,8 +158,8 @@ function initEventsViewSwitch() {
     }
 
     toggleButton.addEventListener('click', () => {
-        const currentIndex = VIEW_MODE_SEQUENCE.indexOf(currentEventsViewMode);
-        const nextView = VIEW_MODE_SEQUENCE[(currentIndex + 1) % VIEW_MODE_SEQUENCE.length];
+        // Cu doar 2 moduri, simplificăm logica
+        const nextView = currentEventsViewMode === EventsViewModes.HORIZONTAL ? EventsViewModes.MARKERS : EventsViewModes.HORIZONTAL;
         setEventsViewMode(nextView);
     });
 
@@ -180,9 +174,28 @@ function setActiveEvent(eventId, { scrollCard = true, panMap = true } = {}) {
         return;
     }
 
+    // Dacă evenimentul este deja activ, nu facem nimic pentru a evita repoziționarea inutilă
+    if (eventId === currentActiveEventId) {
+        return;
+    }
+
+    // Dezactivăm temporar handler-ul de scroll pentru a preveni activarea în lanț
+    if (scrollCard) {
+        disableCarouselScrollSync();
+    }
+    
     currentActiveEventId = eventId;
     highlightCarouselCard(eventId, scrollCard);
     highlightMapMarker(eventId, panMap);
+    
+    // Reactivăm handler-ul de scroll după o întârziere mai lungă pentru a lăsa scroll-ul să se termine
+    if (scrollCard) {
+        setTimeout(() => {
+            enableCarouselScrollSync();
+            // Resetăm flag-ul de debouncing după reactivare
+            this.lastActivationTime = Date.now();
+        }, 800);
+    }
 }
 
 function highlightCarouselCard(eventId, scrollIntoView = true) {
@@ -198,11 +211,10 @@ function highlightCarouselCard(eventId, scrollIntoView = true) {
     });
 
     if (scrollIntoView && targetCard) {
-        const isVertical = currentEventsViewMode === EventsViewModes.VERTICAL;
         const scrollOptions = {
             behavior: 'smooth',
-            block: isVertical ? 'center' : 'nearest',
-            inline: isVertical ? 'nearest' : 'center'
+            block: 'nearest',
+            inline: 'center'
         };
         targetCard.scrollIntoView(scrollOptions);
     }
@@ -218,10 +230,27 @@ function flyToMarker(marker) {
         return;
     }
 
-    map.flyTo(latLng, Math.max(map.getZoom(), 14), {
-        duration: 0.6,
-        easeLinearity: 0.25
-    });
+    // Aplicăm offset în funcție de modul de vizualizare
+    if (currentEventsViewMode === EventsViewModes.MARKERS) {
+        const targetPoint = map.latLngToContainerPoint(latLng);
+        targetPoint.y += 150; // Offset în jos pentru a face loc popup-ului
+        const newLatLng = map.containerPointToLatLng(targetPoint);
+        
+        map.flyTo(newLatLng, Math.max(map.getZoom(), 14), {
+            duration: 0.6,
+            easeLinearity: 0.25
+        });
+    } else {
+        // În modul HORIZONTAL, centrăm markerul mai sus
+        const targetPoint = map.latLngToContainerPoint(latLng);
+        targetPoint.y += 75; // Offset în sus pentru a face loc card-ului
+        const newLatLng = map.containerPointToLatLng(targetPoint);
+        
+        map.flyTo(newLatLng, Math.max(map.getZoom(), 14), {
+            duration: 0.6,
+            easeLinearity: 0.25
+        });
+    }
 }
 
 function highlightMapMarker(eventId, panToMarker = false) {
@@ -231,29 +260,41 @@ function highlightMapMarker(eventId, panToMarker = false) {
         return;
     }
 
+    // Eliminăm clasa 'marker-active' de la toți markerii mai întâi
     markersCollection.forEach(marker => {
-        if (!marker) {
-            return;
-        }
-
-        const markerEventId = marker.eventId || marker.options?.eventId;
+        if (!marker) return;
+        
         const iconElement = marker._icon;
-        const isActive = !!eventId && markerEventId === eventId;
-
         if (iconElement) {
-            iconElement.classList.toggle('marker-active', isActive);
-
+            iconElement.classList.remove('marker-active');
             const customMarker = iconElement.querySelector('.custom-marker');
             if (customMarker) {
-                customMarker.classList.toggle('active', isActive);
-                customMarker.classList.toggle('marker-bounce', isActive);
+                customMarker.classList.remove('active', 'marker-bounce');
+            }
+        }
+    });
+
+    // Acum activăm doar markerul specificat
+    const targetMarker = markersCollection.find(marker => {
+        if (!marker) return false;
+        const markerEventId = marker.eventId || marker.options?.eventId;
+        return markerEventId === eventId;
+    });
+
+    if (targetMarker) {
+        const iconElement = targetMarker._icon;
+        if (iconElement) {
+            iconElement.classList.add('marker-active');
+            const customMarker = iconElement.querySelector('.custom-marker');
+            if (customMarker) {
+                customMarker.classList.add('active', 'marker-bounce');
             }
         }
 
-        if (isActive && panToMarker) {
-            flyToMarker(marker);
+        if (panToMarker) {
+            flyToMarker(targetMarker);
         }
-    });
+    }
 }
 
 function attachCarouselInteractions() {
@@ -299,8 +340,8 @@ function syncActiveEventState(eventList) {
         }
     }
 
+    // Actualizăm doar card-ul din carusel, nu și markerii
     requestAnimationFrame(() => highlightCarouselCard(currentActiveEventId, false));
-    requestAnimationFrame(() => highlightMapMarker(currentActiveEventId, false));
 }
 
 function attachCarouselScrollSync(carousel) {
@@ -320,6 +361,23 @@ function attachCarouselScrollSync(carousel) {
 
     carousel.addEventListener('scroll', handleCarouselScroll, { passive: true });
     carouselScrollListenerAttached = true;
+    carouselScrollHandler = handleCarouselScroll; // Salvăm referința
+}
+
+function disableCarouselScrollSync() {
+    const carousel = document.getElementById('eventsCarousel');
+    if (carousel && carouselScrollHandler) {
+        carousel.removeEventListener('scroll', carouselScrollHandler);
+        carouselScrollListenerAttached = false;
+    }
+}
+
+function enableCarouselScrollSync() {
+    const carousel = document.getElementById('eventsCarousel');
+    if (carousel && !carouselScrollListenerAttached && carouselScrollHandler) {
+        carousel.addEventListener('scroll', carouselScrollHandler, { passive: true });
+        carouselScrollListenerAttached = true;
+    }
 }
 
 function getCenteredCarouselCard() {
@@ -362,7 +420,25 @@ function syncActiveEventWithCenteredCard() {
         return;
     }
 
-    setActiveEvent(eventId, { scrollCard: false, panMap: true });
+    // Debouncing puternic - prevenim activarea multiplă și în lanț
+    const now = Date.now();
+    if (this.lastActivationTime && (now - this.lastActivationTime < 200)) {
+        return;
+    }
+
+    // Verificăm dacă nu suntem deja în proces de activare
+    if (this.isActivating) {
+        return;
+    }
+
+    this.isActivating = true;
+    this.lastActivationTime = now;
+
+    // Folosim setTimeout pentru a preveni activarea în lanț
+    setTimeout(() => {
+        setActiveEvent(eventId, { scrollCard: false, panMap: true });
+        this.isActivating = false;
+    }, 50);
 }
 
 window.setActiveEvent = setActiveEvent;
@@ -595,12 +671,42 @@ function applyCategoryFilter(cityName, category) {
             configureMarkerPopup(marker, popupContent);
             marker.eventId = event.id;
             marker.on('click', () => {
-                setActiveEvent(event.id, { scrollCard: true, panMap: false });
-                if (arePopupsEnabled()) {
-                    configureMarkerPopup(marker);
-                    marker.openPopup();
-                }
-            });
+            // Verificăm dacă markerul este deja activ pentru a evita repoziționarea inutilă
+            if (event.id === currentActiveEventId) {
+                return; // Markerul este deja activ, nu facem nimic
+            }
+            
+            setActiveEvent(event.id, { scrollCard: true, panMap: false });
+            
+            // În modul MARKERS, centrăm markerul mai jos pentru a face loc popup-ului
+            if (currentEventsViewMode === EventsViewModes.MARKERS) {
+                const targetLatLng = L.latLng(event.lat, event.lng);
+                const targetPoint = map.latLngToContainerPoint(targetLatLng);
+                targetPoint.y += 150; // Offset în jos pentru a face loc popup-ului
+                const newLatLng = map.containerPointToLatLng(targetPoint);
+                
+                map.flyTo(newLatLng, Math.max(map.getZoom(), 14), {
+                    duration: 0.6,
+                    easeLinearity: 0.25
+                });
+            } else {
+                // În modul HORIZONTAL, centrăm markerul mai sus
+                const targetLatLng = L.latLng(event.lat, event.lng);
+                const targetPoint = map.latLngToContainerPoint(targetLatLng);
+                targetPoint.y += 75; // Offset în sus pentru a face loc card-ului
+                const newLatLng = map.containerPointToLatLng(targetPoint);
+                
+                map.flyTo(newLatLng, Math.max(map.getZoom(), 14), {
+                    duration: 0.6,
+                    easeLinearity: 0.25
+                });
+            }
+
+            if (currentEventsViewMode === EventsViewModes.MARKERS) {
+                configureMarkerPopup(marker);
+                marker.openPopup();
+            }
+        });
 
             markersGroup.addLayer(marker);
             eventMarkers.push(marker);
@@ -785,24 +891,43 @@ window.EventsFilterModule = {
                 configureMarkerPopup(marker, popupContent);
 
                 marker.on('click', function () {
+                    // Verificăm dacă markerul este deja activ pentru a evita repoziționarea inutilă
+                    if (event.id === currentActiveEventId) {
+                        return; // Markerul este deja activ, nu facem nimic
+                    }
+                    
                     setActiveEvent(event.id, { scrollCard: true, panMap: false });
-                    const targetLatLng = L.latLng(event.lat, event.lng);
-                    const targetPoint = map.project(targetLatLng);
-                    const offsetPoint = L.point(
-                        targetPoint.x,
-                        targetPoint.y + MAP_SETTINGS.FLY_TO_OFFSET_Y
-                    );
-                    const offsetLatLng = map.unproject(offsetPoint);
-                    map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 14), {
-                        duration: 0.6,
-                        easeLinearity: 0.25
-                    });
-
-                    if (arePopupsEnabled()) {
+                    
+                    // În modul MARKERS, centrăm markerul mai jos pentru a face loc popup-ului
+                    if (currentEventsViewMode === EventsViewModes.MARKERS) {
+                        const targetLatLng = L.latLng(event.lat, event.lng);
+                        const targetPoint = map.latLngToContainerPoint(targetLatLng);
+                        targetPoint.y += -150; // Offset în jos pentru a face loc popup-ului
+                        const newLatLng = map.containerPointToLatLng(targetPoint);
+                        
+                        map.flyTo(newLatLng, Math.max(map.getZoom(), 14), {
+                            duration: 0.5,
+                            easeLinearity: 0.25
+                        });
+                        
+                        // Deschidem popup-ul după ce animația se termină
                         setTimeout(() => {
                             configureMarkerPopup(marker);
                             marker.openPopup();
-                        }, 300);
+                        }, 600); // Puțin mai mult decât duration pentru a ne asigura că animația a terminat
+                    } else {
+
+                        
+                        // În modul HORIZONTAL, centrăm markerul mai sus
+                        const targetLatLng = L.latLng(event.lat, event.lng);
+                        const targetPoint = map.latLngToContainerPoint(targetLatLng);
+                        targetPoint.y += 75; // Offset în sus pentru a face loc card-ului
+                        const newLatLng = map.containerPointToLatLng(targetPoint);
+                        
+                        map.flyTo(newLatLng, Math.max(map.getZoom(), 14), {
+                            duration: 0.6,
+                            easeLinearity: 0.25
+                        });
                     }
                 });
 

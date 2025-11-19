@@ -59,7 +59,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Distanța în km
 }
 
-function buildEventContent(event) {
+function buildEventContent(event, isPopup = false) {
     let distanceInfo = '';
 
     if (window.currentPosition) {
@@ -93,6 +93,28 @@ function buildEventContent(event) {
         ? `<img src="${event.image}" alt="${event.title}" class="event-details-image" />`
         : '<div class="event-details-image event-image-fallback"></div>';
 
+    // Construim detaliile în funcție de tipul de afișare
+    let detailsHTML = `
+        <p><i class="far fa-calendar-alt"></i> ${event.date} • ${event.time}</p>
+        <p class="event-location">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="event-location-text">
+                <span class="event-location-name">${event.location}</span>
+                ${isPopup ? `<span class="event-address">${event.address}</span>` : ''}
+            </span>
+        </p>
+    `;
+
+    // Adăugăm prețul doar în popup-uri
+    if (isPopup) {
+        detailsHTML += `<p><i class="fas fa-tag"></i> ${event.price}</p>`;
+    }
+
+    // Adăugăm informația de distanță doar în popup-uri
+    if (isPopup) {
+        detailsHTML += distanceInfo;
+    }
+
     return `
         <div class="event-body">
             <div class="event-details-layout">
@@ -101,16 +123,7 @@ function buildEventContent(event) {
                         <h3>${event.title}</h3>
                     </div>
                     <div class="event-details">
-                        <p><i class="far fa-calendar-alt"></i> ${event.date} • ${event.time}</p>
-                        <p class="event-location">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span class="event-location-text">
-                                <span class="event-location-name">${event.location}</span>
-                                <span class="event-address">${event.address}</span>
-                            </span>
-                        </p>
-                        <p><i class="fas fa-tag"></i> ${event.price}</p>
-                        ${distanceInfo}
+                        ${detailsHTML}
                     </div>
                 </div>
                 <div class="event-details-media" data-event-id="${event.id}">
@@ -129,7 +142,7 @@ function buildEventContent(event) {
 function createEventPopup(event) {
     return `
         <div class="event-popup">
-            ${buildEventContent(event)}
+            ${buildEventContent(event, true)}
         </div>
     `;
 }
@@ -138,7 +151,7 @@ function createEventPopup(event) {
 function createEventCard(event) {
     return `
         <article class="event-card" data-event-id="${event.id}">
-            ${buildEventContent(event)}
+            ${buildEventContent(event, false)}
         </article>
     `;
 }

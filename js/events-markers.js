@@ -7,8 +7,7 @@ const MAP_SETTINGS = {
     MAX_ZOOM: 18,              // Zoom-ul maxim permis
     MIN_DISTANCE_KM: 0.5,       // Distanța minimă pentru filtrare (km)
     MAX_DISTANCE_KM: 20,        // Distanța maximă pentru filtrare (km)
-    FLY_TO_DURATION: 0.5,       // Durata animației de zoom (secunde)
-    FLY_TO_OFFSET_Y: -150       // Offset vertical pentru centrare (px)
+    FLY_TO_DURATION: 0.5       // Durata animației de zoom (secunde)
 };
 
 // Variabile globale pentru markerii evenimentelor
@@ -90,12 +89,17 @@ function updateMapWithFilteredEvents(filteredEvents) {
                     eventId: event.id
                 });
 
-                // Eveniment de click pentru a centra harta pe marker
-                marker.on('click', function () {
-                    map.flyTo([event.lat, event.lng], 15, {
-                        duration: 0.5,
-                        easeLinearity: 0.25,
-                        animate: true
+                // Adăugăm handler de click pentru consistență
+                marker.on('click', () => {
+                    if (typeof setActiveEvent === 'function') {
+                        setActiveEvent(event.id, { scrollCard: true, panMap: false });
+                    }
+                    
+                    // Centrăm direct pe marker
+                    const targetLatLng = L.latLng(event.lat, event.lng);
+                    map.flyTo(targetLatLng, Math.max(map.getZoom(), 14), {
+                        duration: 0.6,
+                        easeLinearity: 0.25
                     });
                 });
             }
